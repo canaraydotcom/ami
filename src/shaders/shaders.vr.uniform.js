@@ -63,6 +63,21 @@ export default class ShadersUniform {
         value: [],
         typeGLSL: 'sampler2D'
       },
+      'uTextureDepth': {
+        type: 't',
+        value: [],
+        typeGLSL: 'sampler2D'
+      },
+      'uCameraNear': {
+        type: 'f',
+        value: 0.0,
+        typeGLSL: 'float'
+      },
+      'uCameraFar': {
+        type: 'f',
+        value: 0.0,
+        typeGLSL: 'float'
+      },
       'uPixelType': {
         type: 'i',
         value: 0,
@@ -92,6 +107,16 @@ export default class ShadersUniform {
       'uAlphaCorrection':{
         type: 'f',
         value: 0.5,
+        typeGLSL: 'float'
+      },
+      'uScreenWidth':{
+        type: 'f',
+        value: 1.0,
+        typeGLSL: 'float'
+      },
+      'uScreenHeight':{
+        type: 'f',
+        value: 1.0,
         typeGLSL: 'float'
       },
       'uFrequence':{

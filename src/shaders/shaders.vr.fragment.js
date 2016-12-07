@@ -22,11 +22,11 @@ export default class ShadersFragment {
 
     let content = '';
     for ( let property in this._functions ) {
-    
+
       content  += this._functions[property] + '\n';
-    
+
     }
-    
+
     return content;
 
   }
@@ -35,28 +35,36 @@ export default class ShadersFragment {
 
     let content = '';
     for ( let property in this._uniforms ) {
-      
+
       let uniform = this._uniforms[property];
-      content += `uniform ${uniform.typeGLSL} ${property}`; 
-      
+      content += `uniform ${uniform.typeGLSL} ${property}`;
+
       if( uniform && uniform.length ){
-      
+
         content += `[${uniform.length}]`;
-      
+
       }
-      
+
       content += ';\n';
-    
+
     }
-    
+
     return content;
 
   }
 
   main(){
-  
+
     // need to pre-call main to fill up the functions list
     this._main = `
+
+float readDepth () {
+    vec2 coord = vec2(gl_FragCoord.x / uScreenWidth, gl_FragCoord.y / uScreenHeight);
+    float fragCoordZ = texture2D(uTextureDepth, coord).x;
+    
+    return -perspectiveDepthToViewZ( fragCoordZ, uCameraNear, uCameraFar );
+}
+
 void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradient){
 
   vec4 dataValue = vec4(0., 0., 0., 0.);
@@ -72,7 +80,8 @@ void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradien
 }
 
 void main(void) {
-  const int maxSteps = 1024;
+  const int maxIter = 256;
+  const float minStepSize = 1.0;
 
   // the ray
   vec3 rayOrigin = cameraPosition;
@@ -88,55 +97,86 @@ void main(void) {
   ${shadersIntersectBox.api( this, 'rayOrigin', 'rayDirection', 'AABBMin', 'AABBMax', 'tNear', 'tFar', 'intersect' )}
   if (tNear < 0.0) tNear = 0.0;
 
+  float maxZ = readDepth();
+
   // init the ray marching
-  float tCurrent = tNear;
-  float tStep = (tFar - tNear) / float(uSteps);
+  float tStep = (min(tFar, maxZ) - tNear) / float(uSteps);
+  tStep = max(minStepSize, tStep);
   vec4 accumulatedColor = vec4(0.0);
   float accumulatedAlpha = 0.0;
 
-  for(int rayStep = 0; rayStep < maxSteps; rayStep++){
-    vec3 currentPosition = rayOrigin + rayDirection * tCurrent;
+  vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
+
+  vec3 rayStartPosition = rayOrigin + rayDirection * tNear;
+  vec3 currentVoxel = vec3(uWorldToData * vec4(rayStartPosition, 1.0));
+
+  vec3 stepVector = mat3(uWorldToData) * (rayDirection * tStep);
+
+  float currentZ = tNear;
+  
+//  gl_FragColor.rgb = vec3((maxZ - uCameraNear) / (uCameraFar - uCameraNear));
+//  gl_FragColor.a = 1.0;
+//  return;
+
+  if (currentZ >= maxZ) {
+    gl_FragColor.a = 0.0;
+    return;
+  }
+
+  bool lastStep = false;
+  for (int rayStep = 0; rayStep < maxIter; rayStep++) {
+    if (currentZ >= maxZ) {
+      lastStep = true;
+      currentVoxel -= stepVector * (currentZ - maxZ);
+    }
+    
+    //vec3 currentPosition = rayOrigin + rayDirection * tCurrent;
+
     // some non-linear FUN
     // some occlusion issue to be fixed
-    vec3 transformedPosition = currentPosition; //transformPoint(currentPosition, uAmplitude, uFrequence);
+    //vec3 transformedPosition = currentPosition; //transformPoint(currentPosition, uAmplitude, uFrequence);
+
+
     // world to data coordinates
     // rounding trick
     // first center of first voxel in data space is CENTERED on (0,0,0)
-    vec4 dataCoordinatesRaw = uWorldToData * vec4(transformedPosition, 1.0);
-    vec3 currentVoxel = vec3(dataCoordinatesRaw.x, dataCoordinatesRaw.y, dataCoordinatesRaw.z);
+    // vec4 dataCoordinatesRaw = uWorldToData * vec4(transformedPosition, 1.0);
+    // vec3 currentVoxel = vec3(uWorldToData * vec4(transformedPosition, 1.0));
 
     if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
-         all(lessThan(currentVoxel, vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z))))) {
-    // mapped intensity, given slope/intercept and window/level
-    float intensity = 0.0;
-    vec3 gradient = vec3(0., 0., 0.);
-    getIntensity(currentVoxel, intensity, gradient);
+         all(lessThan(currentVoxel, dataDim))) {
+      // mapped intensity, given slope/intercept and window/level
+      float intensity = 0.0;
+      vec3 gradient = vec3(0., 0., 0.);
+      getIntensity(currentVoxel, intensity, gradient);
 
-    vec4 colorSample;
-    float alphaSample;
-    if(uLut == 1){
-      vec4 colorFromLUT = texture2D( uTextureLUT, vec2( intensity, 1.0) );
-      // 256 colors
-      colorSample = colorFromLUT;
-      alphaSample = colorFromLUT.a;
+      vec4 colorSample;
+      float alphaSample;
+      if(uLut == 1){
+        vec4 colorFromLUT = texture2D( uTextureLUT, vec2( intensity, 1.0) );
+        // 256 colors
+        colorSample = colorFromLUT;
+        alphaSample = colorFromLUT.a;
+      }
+      else{
+        alphaSample = intensity;
+        colorSample.r = colorSample.g = colorSample.b = intensity * alphaSample;
+      }
+
+      alphaSample = alphaSample * uAlphaCorrection;
+      alphaSample *= (1.0 - accumulatedAlpha);
+
+      accumulatedColor += alphaSample * colorSample;
+      accumulatedAlpha += alphaSample;
+
     }
-    else{
-      alphaSample = intensity;
-      colorSample.r = colorSample.g = colorSample.b = intensity * alphaSample;
+
+    currentVoxel += stepVector;
+    currentZ += tStep;
+
+    if (currentZ >= tFar || lastStep || rayStep >= uSteps || accumulatedAlpha >= 1.0 ) {
+      break;
     }
-
-    alphaSample = alphaSample * uAlphaCorrection;
-    alphaSample *= (1.0 - accumulatedAlpha);
-
-    accumulatedColor += alphaSample * colorSample;
-    accumulatedAlpha += alphaSample;
-
-    }
-
-
-    tCurrent += tStep;
-
-    if(tCurrent > tFar || accumulatedAlpha >= 1.0 ) break;
   }
 
   gl_FragColor = vec4(accumulatedColor.xyz, accumulatedAlpha);
@@ -150,8 +190,10 @@ void main(void) {
     let shaderInterpolation = '';
     // shaderInterpolation.inline(args) //true/false
     // shaderInterpolation.functions(args)
-    
+
     return `
+#include <packing>
+    
 // uniforms
 ${this.uniforms()}
 
@@ -164,6 +206,6 @@ ${this.functions()}
 // main loop
 ${this._main}
       `;
-    }
+  }
 
 }
