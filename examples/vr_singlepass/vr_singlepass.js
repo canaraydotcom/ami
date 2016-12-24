@@ -51,8 +51,8 @@ function onWindowResize() {
   // notify the renderer of the size change
   renderer.setSize(threeD.offsetWidth, threeD.offsetHeight);
 
-  vrHelper.uniforms.uScreenWidth.value = threeD.offsetWidth;
-  vrHelper.uniforms.uScreenHeight.value = threeD.offsetHeight;
+  vrHelper.uniforms.uScreenWidth.value = threeD.offsetWidth * window.devicePixelRatio;
+  vrHelper.uniforms.uScreenHeight.value = threeD.offsetHeight * window.devicePixelRatio;
 }
 
 function buildGUI() {
@@ -295,7 +295,7 @@ window.onload = function () {
 
   let files = ['https://cdn.rawgit.com/FNNDSC/data/master/nifti/eun_brain/eun_uchar_8.nii.gz'];
 
-  // files = ['http://127.0.0.1:8080/brainc.nii']
+  // files = ['http://127.0.0.1:8000/livetest.nii.gz'];
 
   //   let data = [
   //  'scan-00109_rec-01a.nii_.gz'
@@ -355,8 +355,8 @@ window.onload = function () {
       vrHelper.uniforms.uTextureDepth.value = target.depthTexture;
       vrHelper.uniforms.uCameraNear.value = camera.near;
       vrHelper.uniforms.uCameraFar.value = camera.far;
-      vrHelper.uniforms.uScreenWidth.value = threeD.offsetWidth;
-      vrHelper.uniforms.uScreenHeight.value = threeD.offsetHeight;
+      vrHelper.uniforms.uScreenWidth.value = threeD.offsetWidth * window.devicePixelRatio;
+      vrHelper.uniforms.uScreenHeight.value = threeD.offsetHeight * window.devicePixelRatio;
 
       // update camrea's and interactor's target
       let centerLPS = stack.worldCenter();
@@ -387,3 +387,5 @@ window.onload = function () {
     .catch((error) => window.console.log(error));
 
 };
+
+
