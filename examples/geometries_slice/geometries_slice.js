@@ -5,7 +5,7 @@ import HelpersStack      from '../../src/helpers/helpers.stack';
 import LoadersVolume     from '../../src/loaders/loaders.volume';
 
 // standard global letiables
-let controls, renderer, stats, scene, camera, stackHelper, particleLight, line, threeD;
+let controls, renderer, stats, scene, camera, stackHelper, particleLight, line, threeD, torusKnotGeometry, torusKnot, sliced, slicedGeometry, slicedMaterial, slicePlane;
 
 function componentToHex( c ) {
 
@@ -27,7 +27,7 @@ function updateGeometries() {
 
     // move the "light"
     // update light position
-    let timer = Date.now() * 0.00025;
+    let timer = Date.now() * 0.0001;
     particleLight.position.x = Math.sin(timer * 7) * 70;
     particleLight.position.y = Math.cos(timer * 5) * 80;
     particleLight.position.z = Math.cos(timer * 3) * 90;
@@ -59,6 +59,19 @@ function updateGeometries() {
     stackHelper.border.color = color;
     particleLight.material.color.set( color );
     line.material.color.set( color );
+
+    // slice knot
+    slicePlane.setFromNormalAndCoplanarPoint(stackHelper.slice.planeDirection, stackHelper.slice.planePosition);
+
+    scene.remove(sliced);
+    sliced = new THREE.LineSegments(sliceGeometry(torusKnotGeometry, slicePlane), slicedMaterial);
+    sliced.renderOrder = 10;
+    scene.add(sliced);
+
+    // slicedGeometry.vertices = sliceGeometry(torusKnotGeometry, slicePlane);
+    // const args = [0, slicedGeometry.vertices.length, ...sliceGeometry(torusKnotGeometry, slicePlane).vertices];
+    // Array.prototype.splice.apply(slicedGeometry.vertices, args);
+    // slicedGeometry.verticesNeedUpdate = true;
 
   }
 
@@ -102,8 +115,8 @@ function init() {
 
   // camera
   camera = new THREE.PerspectiveCamera( 45, threeD.offsetWidth / threeD.offsetHeight, 0.01, 10000000 );
-  camera.position.x = 150;
-  camera.position.y = 150;
+  camera.position.x = 250;
+  camera.position.y = 250;
   camera.position.z = 100;
 
   // controls
@@ -117,6 +130,35 @@ function init() {
 
   particleLight = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 8), new THREE.MeshBasicMaterial({color: 0xFFF336}));
   scene.add(particleLight);
+
+  // knot
+  torusKnotGeometry = new THREE.TorusKnotGeometry(30, 8, 128, 64);
+  const material = new THREE.MeshLambertMaterial({color: 'green'});
+  torusKnot = new THREE.Mesh(torusKnotGeometry, material);
+  torusKnot.renderOrder = 20;
+  // torusKnot.position.set(0, 0, 20);
+  scene.add(torusKnot);
+
+  // lights
+  const directionalLight = new THREE.DirectionalLight(0xffffff);
+  directionalLight.position.set(1, 1, -10);
+  scene.add(directionalLight);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambientLight);
+
+  // slice plane
+  slicePlane = new THREE.Plane();
+
+  // slice
+  slicedGeometry = new THREE.Geometry();
+  slicedMaterial = new THREE.LineBasicMaterial({
+    color: 0xff0000,
+    depthTest: false
+  });
+  slicedMaterial.linewidth = 5;
+  sliced = new THREE.LineSegments(slicedGeometry, slicedMaterial);
+  scene.add(sliced);
 
   animate();
 }
@@ -237,10 +279,15 @@ window.onload = function() {
       0, 1 ).step( 1 ).listen();
     positionFolder.open();
 
+    let knotFolder = gui.addFolder("Knot");
+    let knotVisible = knotFolder.add(torusKnot, "visible");
+    knotFolder.open();
 
     frameIndexControllerOriginI.onChange( updateGeometries );
     frameIndexControllerOriginJ.onChange( updateGeometries );
     frameIndexControllerOriginK.onChange( updateGeometries );
+
+
 
     function onWindowResize() {
 
@@ -259,4 +306,80 @@ window.onload = function() {
   });
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// slice mesh
+//
 
+function sliceGeometry(geom, plane) {
+  let sliced = new THREE.Geometry();
+  let points;
+
+  geom.faces.forEach(function(face, faceIndex) {
+    points = facePoints(geom, face, faceIndex);
+    if (faceIntersectsPlane(plane, points)) {
+      sliceFace(plane, sliced, points);
+    }
+  });
+
+  return sliced;
+}
+
+function facePoints(geom, face, faceIndex) {
+  const uvs = geom.faceVertexUvs[0];
+  return ['a', 'b', 'c'].map(function(key, i) {
+    return {
+      vertex: geom.vertices[face[key]],
+      normal: face.vertexNormals[i],
+      uv: uvs[faceIndex] ? uvs[faceIndex][i] : undefined,
+    };
+  });
+}
+
+function faceIntersectsPlane(plane, points) {
+  // TODO : in production is should be most probably removed
+  if (points.length != 3) {
+    console.error("points must have length 3 (triangle). you passed in length " + points.length);
+  }
+  // a plane always intersects two sides of a triangle or none. so only two sides need to be checked.
+  for (let i = 0; i < 2; ++i) {
+    const line = new THREE.Line3(points[i].vertex, points[i + 1].vertex);
+    if (plane.intersectsLine(line)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const intersectPlane = function(p1, p2, plane) {
+  const line = new THREE.Line3(p1.vertex, p2.vertex);
+  const intersection = plane.intersectLine(line);
+  if (intersection) {
+    const distance = p1.vertex.distanceTo(intersection);
+    const alpha = distance / line.distance();
+    return {
+      vertex: intersection,
+      normal: p1.normal.clone().lerp(p2.normal, alpha).normalize(),
+      uv: p1.uv && p2.uv ? p1.uv.clone().lerp(p2.uv, alpha) : null
+    };
+  }
+};
+
+function sliceFace(plane, sliced, points) {
+  let i;
+  let len = points.length;
+  let p1;
+  let p2;
+  let intersection;
+
+  for (i = 0; i < len; i++) {
+    p1 = points[i];
+    p2 = points[(i + 1) % len];
+    intersection = intersectPlane(p1, p2, plane);
+    if (intersection) {
+      sliced.vertices.push(intersection.vertex);
+    }
+  }
+
+
+}

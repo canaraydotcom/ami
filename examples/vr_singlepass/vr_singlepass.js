@@ -367,20 +367,6 @@ window.onload = function () {
       // create GUI
       buildGUI();
 
-      // screenshot experiment
-      let screenshotElt = document.getElementById('screenshot');
-      screenshotElt.addEventListener('click', function () {
-        controls.update();
-
-        if (ready) {
-          renderer.render(scene, camera);
-        }
-
-        let screenshot = renderer.domElement.toDataURL();
-        screenshotElt.download = 'AMI-' + Date.now() + '.png';
-        screenshotElt.href = screenshot;
-      });
-
       // good to go
       ready = true;
     })
