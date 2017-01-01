@@ -380,6 +380,4 @@ function sliceFace(plane, sliced, points) {
       sliced.vertices.push(intersection.vertex);
     }
   }
-
-
 }

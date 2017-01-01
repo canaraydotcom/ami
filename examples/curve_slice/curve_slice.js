@@ -4,22 +4,25 @@ import ControlsTrackball from '../../src/controls/controls.trackball';
 import HelpersStack      from '../../src/helpers/helpers.stack';
 import HelpersCurved     from '../../src/helpers/helpers.curved';
 import LoadersVolume     from '../../src/loaders/loaders.volume';
-import {CURVE_SEGMENTS}  from '../../src/shaders/shaders.curved.fragment';
+// import {CURVE_SEGMENTS}  from '../../src/shaders/shaders.curved.fragment';
+
+const CURVE_SEGMENTS = 128;
 
 // standard global letiables
 let controls, renderer, renderer2, stats, scene, scene2,
   camera, camera2, stackHelper, curvedHelper, threeD, threeD2,
   torusKnotGeometry, torusKnot, sliced, slicedGeometry, slicedMaterial,
-  slicePlane, curveHandles, curve, curveLine, dragControls;
+  slicePlane, curveHandles, curve, curveLine, dragControls,
+  curveSliced, curveSlicedGeometry;
 
 let zoomFactor = 0.2;
-let zoomFactor2 = 0.3;
+let zoomFactor2 = 0.2;
 
 const curveHandlePositions = [
-  new THREE.Vector3(-10, -10, 0),
+  new THREE.Vector3(-30, -10, 0),
   new THREE.Vector3(-10, 10, 0),
   new THREE.Vector3(10, 10, 0),
-  new THREE.Vector3(10, -10, 0)
+  new THREE.Vector3(30, -10, 0)
 ];
 
 function componentToHex(c) {
@@ -72,6 +75,11 @@ function updateGeometries() {
 
     curve.updateArcLengths();
     curvedHelper.curve = curve;
+
+    scene2.remove(curveSliced);
+    // curveSliced = new THREE.LineSegments(sliceGeometryCurved(torusKnotGeometry, curveLine.geometry), slicedMaterial);
+    curveSliced.renderOrder = 10;
+    scene2.add(curveSliced);
   }
 
 }
@@ -168,9 +176,9 @@ function init() {
   slicedGeometry = new THREE.Geometry();
   slicedMaterial = new THREE.LineBasicMaterial({
     color: 0xff0000,
-    depthTest: false
+    depthTest: false,
+    linewidth: 2,
   });
-  slicedMaterial.linewidth = 5;
   sliced = new THREE.LineSegments(slicedGeometry, slicedMaterial);
   scene.add(sliced);
 
@@ -231,8 +239,13 @@ function init() {
     zoomFactor2 * threeD2.offsetHeight / 2, zoomFactor2 * threeD2.offsetHeight / -2, 0, 1000);
   camera2.position.x = 0;
   camera2.position.y = -100;
-  camera2.position.z = -50;
+  camera2.position.z = -30;
   camera2.rotation.x = 90;
+
+  // slice
+  curveSlicedGeometry = new THREE.Geometry();
+  curveSliced = new THREE.LineSegments(curveSlicedGeometry, slicedMaterial);
+  scene2.add(curveSliced);
 
   animate();
 }
@@ -334,6 +347,7 @@ window.onload = function () {
       // controls.target.set( centerLPS.x, centerLPS.y, centerLPS.z );
 
       curvedHelper = new HelpersCurved(stack, curve);
+      curvedHelper.interpolation = 1;
       scene2.add(curvedHelper);
 
       // create GUI
@@ -377,18 +391,42 @@ window.onload = function () {
 // slice mesh
 //
 
-function sliceGeometry(geom, plane) {
+function sliceGeometryCurved(geom, curvedGeom) {
   let sliced = new THREE.Geometry();
+
+  for (let i = 0; i < curvedGeom.vertices.length; i += 2) {
+    sliceGeometryWithSegment(geom, curvedGeom.vertices[i], curvedGeom.vertices[i + 1], sliced);
+  }
+
+  return sliced;
+}
+
+function sliceGeometryWithSegment(geom, segmentStart, segmentEnd, sliced) {
   let points;
+
+  const segmentDirection = segmentEnd.clone();
+  segmentDirection.sub(segmentStart);
+  const segmentLength = segmentDirection.length();
+  segmentDirection.normalize();
+  const normal = new THREE.Vector3(-segmentDirection.y, segmentDirection.x, 0);
+
+  const plane = new THREE.Plane();
+  plane.setFromNormalAndCoplanarPoint(normal, segmentStart);
 
   geom.faces.forEach(function (face, faceIndex) {
     points = facePoints(geom, face, faceIndex);
     if (faceIntersectsPlane(plane, points)) {
-      sliceFace(plane, sliced, points);
+      for (let p of points) {
+        const v = p.vertex.clone();
+        v.sub(segmentStart);
+        const projected = segmentDirection.dot(v);
+        if (projected >= 0 && projected <= segmentLength) {
+          sliceFaceWithSegment(plane, segmentStart, segmentDirection, segmentLength, sliced, points);
+          break;
+        }
+      }
     }
   });
-
-  return sliced;
 }
 
 function facePoints(geom, face, faceIndex) {
@@ -431,6 +469,68 @@ const intersectPlane = function (p1, p2, plane) {
     };
   }
 };
+
+function sliceFaceWithSegment(plane, segmentStart, segmentDirection, segmentLength, sliced, points) {
+  let i;
+  let len = points.length;
+  let p1;
+  let p2;
+  let intersections = [];
+
+  for (i = 0; i < len; ++i) {
+    p1 = points[i];
+    p2 = points[(i + 1) % len];
+    const intersection = intersectPlane(p1, p2, plane);
+    if (intersection) {
+      intersections.push(intersection.vertex);
+    }
+  }
+
+  let dir = intersections[1].clone();
+  dir.sub(intersections[0]);
+
+  // dir.normalize();
+  if (dir.dot(segmentDirection) < 0) {
+    [intersections[1], intersections[0]] = intersections;
+    dir.negate();
+  }
+
+  // const facs = [0, 0];
+  //
+  // for (i = 0; i < 2; ++i) {
+  //   const v = intersections[i].clone();
+  //   v.sub(segmentStart);
+  //
+  //   facs[i] = segmentDirection.dot(v);
+  // }
+  //
+  // if (facs[1] > segmentLength) {
+  //   intersections[1] = intersections[0].clone();
+  //   intersections[1].addScaledVector(dir, (segmentLength - facs[0]) / (facs[1] - facs[0]));
+  // }
+  //
+  // if (facs[0] < 0) {
+  //   intersections[0].addScaledVector(dir, -facs[0] / (facs[1] - facs[0]));
+  // }
+
+  sliced.vertices.push(...intersections);
+}
+
+
+
+function sliceGeometry(geom, plane) {
+  let sliced = new THREE.Geometry();
+  let points;
+
+  geom.faces.forEach(function(face, faceIndex) {
+    points = facePoints(geom, face, faceIndex);
+    if (faceIntersectsPlane(plane, points)) {
+      sliceFace(plane, sliced, points);
+    }
+  });
+
+  return sliced;
+}
 
 function sliceFace(plane, sliced, points) {
   let i;
