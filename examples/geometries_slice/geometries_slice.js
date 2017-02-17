@@ -114,7 +114,7 @@ function init() {
   scene = new THREE.Scene();
 
   // camera
-  camera = new THREE.PerspectiveCamera( 45, threeD.offsetWidth / threeD.offsetHeight, 0.01, 10000000 );
+  camera = new THREE.PerspectiveCamera( 45, threeD.offsetWidth / threeD.offsetHeight, 1, 1000 );
   camera.position.x = 250;
   camera.position.y = 250;
   camera.position.z = 100;
@@ -156,7 +156,7 @@ function init() {
     color: 0xff0000,
     depthTest: false
   });
-  slicedMaterial.linewidth = 5;
+  slicedMaterial.linewidth = 3;
   sliced = new THREE.LineSegments(slicedGeometry, slicedMaterial);
   scene.add(sliced);
 
