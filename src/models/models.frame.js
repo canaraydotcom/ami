@@ -1,4 +1,4 @@
-/*** Imports ***/
+/** * Imports ***/
 import ModelsBase from '../../src/models/models.base';
 
 /**
@@ -7,7 +7,7 @@ import ModelsBase from '../../src/models/models.base';
  * @module models/frame
  */
 
-export default class ModelsFrame extends ModelsBase{
+export default class ModelsFrame extends ModelsBase {
   constructor() {
     super();
 
@@ -22,6 +22,7 @@ export default class ModelsFrame extends ModelsBase{
     this._rightHanded = true;
     this._sliceThickness = 1;
     this._spacingBetweenSlices = null;
+    this._pixelRepresentation = 0;
     this._pixelType = 0;
     this._pixelSpacing = null;
     this._pixelAspectRatio = null;
@@ -38,11 +39,12 @@ export default class ModelsFrame extends ModelsBase{
     this._minMax = null;
     this._dist = null;
 
+    this._index = -1;
+
     this._referencedSegmentNumber = -1;
   }
 
   validate(model) {
-
     if (!(super.validate(model) &&
       typeof model.cosines === 'function' &&
       typeof model.spacingXY === 'function' &&
@@ -50,9 +52,7 @@ export default class ModelsFrame extends ModelsBase{
       model.hasOwnProperty('_dimensionIndexValues') &&
       model.hasOwnProperty('_imageOrientation') &&
       model.hasOwnProperty('_imagePosition'))) {
-
       return false;
-
     }
 
     return true;
@@ -62,7 +62,7 @@ export default class ModelsFrame extends ModelsBase{
    * Merge current frame with provided frame.
    *
    * Frames can be merged (i.e. are identical) if following are equals:
-   *  - dimensionIndexValues 
+   *  - dimensionIndexValues
    *  - imageOrientation
    *  - imagePosition
    *  - instanceNumber
@@ -71,8 +71,7 @@ export default class ModelsFrame extends ModelsBase{
    * @returns {boolean} True if frames could be merge. False if not.
    */
   merge(frame) {
-
-    if(!this.validate(frame)){
+    if(!this.validate(frame)) {
       return false;
     }
 
@@ -81,15 +80,10 @@ export default class ModelsFrame extends ModelsBase{
         this._compareArrays(this._imagePosition, frame.imagePosition) &&
         this._instanceNumber === frame.instanceNumber &&
         this._sopInstanceUID === frame.sopInstanceUID) {
-
       return true;
-
     } else {
-
       return false;
-
     }
-
   }
 
   /**
@@ -98,58 +92,45 @@ export default class ModelsFrame extends ModelsBase{
    *
    * @returns {array} Array[3] containing cosinesX, Y and Z.
    */
-  cosines(){
-
-    let cosines = [new THREE.Vector3(1, 0, 0), 
-      new THREE.Vector3(0, 1, 0), 
+  cosines() {
+    let cosines = [new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 1, 0),
       new THREE.Vector3(0, 0, 1)];
 
      if (this._imageOrientation &&
       this._imageOrientation.length === 6) {
-
       let xCos = new THREE.Vector3(this._imageOrientation[0], this._imageOrientation[1], this._imageOrientation[2]);
       let yCos = new THREE.Vector3(this._imageOrientation[3], this._imageOrientation[4], this._imageOrientation[5]);
 
-      if( xCos.length() > 0 && yCos.length() > 0){
-
+      if(xCos.length() > 0 && yCos.length() > 0) {
         cosines[0] = xCos;
         cosines[1] = yCos;
         cosines[2] = new THREE.Vector3(0, 0, 0).crossVectors(cosines[0], cosines[1]).normalize();
-
       }
-
-    }
-    else{
-
+    } else{
       window.console.log('No valid image orientation for frame');
       window.console.log(this);
       window.console.log('Returning default orientation.');
-
     }
 
-    if( !this._rightHanded ){
-
+    if(!this._rightHanded) {
       cosines[2].negate();
-
     }
 
     return cosines;
   }
 
-  spacingXY(){
+  spacingXY() {
     let spacingXY = [1.0, 1.0];
 
     if (this.pixelSpacing) {
-
       spacingXY[0] = this.pixelSpacing[0];
 
       spacingXY[1] = this.pixelSpacing[1];
-    } else if ( this.pixelAspectRatio ) {
-
+    } else if (this.pixelAspectRatio) {
       spacingXY[0] = 1.0;
       spacingXY[1] = 1.0 * this.pixelAspectRatio[1] / this.pixelAspectRatio[0];
-
-    } 
+    }
 
     return spacingXY;
   }
@@ -334,6 +315,14 @@ export default class ModelsFrame extends ModelsBase{
     return this._sopInstanceUID;
   }
 
+  get pixelRepresentation() {
+    return this._pixelRepresentation;
+  }
+
+  set pixelRepresentation(pixelRepresentation) {
+    this._pixelRepresentation = pixelRepresentation;
+  }
+
   get pixelType() {
     return this._pixelType;
   }
@@ -342,27 +331,35 @@ export default class ModelsFrame extends ModelsBase{
     this._pixelType = pixelType;
   }
 
-  get url(){
+  get url() {
     return this._url;
   }
 
-  set url(url){
+  set url(url) {
     this._url = url;
   }
 
-  get referencedSegmentNumber(){
+  get referencedSegmentNumber() {
     return this._referencedSegmentNumber;
   }
 
-  set referencedSegmentNumber(referencedSegmentNumber){
+  set referencedSegmentNumber(referencedSegmentNumber) {
     this._referencedSegmentNumber = referencedSegmentNumber;
   }
 
-  get rightHanded(){
+  get rightHanded() {
     return this._rightHanded;
   }
 
-  set rightHanded(rightHanded){
+  set rightHanded(rightHanded) {
     this._rightHanded = rightHanded;
+  }
+
+  get index() {
+    return this._index;
+  }
+
+  set index(index) {
+    this._index = index;
   }
 }

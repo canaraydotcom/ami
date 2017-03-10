@@ -287,91 +287,55 @@ void main() {
   animate();
 }
 
-window.onload = function () {
+window.onload = function() {
 
   // init threeJS
   initFirstPass();
   init();
 
-  let files = ['https://cdn.rawgit.com/FNNDSC/data/master/nifti/eun_brain/eun_uchar_8.nii.gz'];
-
-  // files = ['http://127.0.0.1:8000/livetest.nii.gz'];
-
-  //   let data = [
-  //  'scan-00109_rec-01a.nii_.gz'
-  //   // '7002_t1_average_BRAINSABC.nii.gz'
-  // ];
-
-  // let files = data.map(function(v) {
-  //   return '../../data/nii/' + v;
-  // });
+  let filename = 'https://cdn.rawgit.com/FNNDSC/data/master/nifti/eun_brain/eun_uchar_8.nii.gz';
 
   // load sequence for each file
   // instantiate the loader
-  // it loads and parses the dicom image
-  // hookup a progress bar....
   let loader = new LoadersVolume(threeD);
-  let seriesContainer = [];
-  let loadSequence = [];
-  files.forEach((url) => {
-    loadSequence.push(
-      Promise.resolve()
-      // fetch the file
-        .then(() => loader.fetch(url))
-        .then((data) => loader.parse(data))
-        .then((series) => {
-          seriesContainer.push(series);
-        })
-        .catch(function (error) {
-          window.console.log('oops... something went wrong...');
-          window.console.log(error);
-        })
-    );
-  });
+  loader.load(filename)
+  .then(() => {
+    let series = loader.data[0].mergeSeries(loader.data)[0];
+    loader.free();
+    loader = null;
+    // get first stack from series
+    let stack = series.stack[0];
 
-  // load sequence for all files
-  Promise
-    .all(loadSequence)
-    .then(() => {
-      loader.free();
-      loader = null;
+    vrHelper = new HelpersVR(stack);
+    // scene
+    scene.add(vrHelper);
 
-      let series = seriesContainer[0].mergeSeries(seriesContainer)[0];
-      // get first stack from series
-      let stack = series.stack[0];
+    // CREATE LUT
+    lut = new HelpersLut('my-lut-canvases');
+    lut.luts = HelpersLut.presetLuts();
+    lut.lutsO = HelpersLut.presetLutsO();
+    // update related uniforms
+    vrHelper.uniforms.uTextureLUT.value = lut.texture;
+    vrHelper.uniforms.uLut.value = 1;
+    vrHelper.uniforms.uSteps.value = myStack.steps;
+    vrHelper.uniforms.uTextureDepth.value = target.depthTexture;
+    vrHelper.uniforms.uCameraNear.value = camera.near;
+    vrHelper.uniforms.uCameraFar.value = camera.far;
+    vrHelper.uniforms.uScreenWidth.value = threeD.offsetWidth * window.devicePixelRatio;
+    vrHelper.uniforms.uScreenHeight.value = threeD.offsetHeight * window.devicePixelRatio;
 
-      vrHelper = new HelpersVR(stack);
-      // scene
-      scene.add(vrHelper);
+    // update camrea's and interactor's target
+    let centerLPS = stack.worldCenter();
+    camera.lookAt(centerLPS.x, centerLPS.y, centerLPS.z);
+    camera.updateProjectionMatrix();
+    controls.target.set(centerLPS.x, centerLPS.y, centerLPS.z);
 
-      // CREATE LUT
-      lut = new HelpersLut('my-lut-canvases');
-      lut.luts = HelpersLut.presetLuts();
-      lut.lutsO = HelpersLut.presetLutsO();
-      // update related uniforms
-      vrHelper.uniforms.uTextureLUT.value = lut.texture;
-      vrHelper.uniforms.uLut.value = 1;
-      vrHelper.uniforms.uSteps.value = myStack.steps;
-      vrHelper.uniforms.uTextureDepth.value = target.depthTexture;
-      vrHelper.uniforms.uCameraNear.value = camera.near;
-      vrHelper.uniforms.uCameraFar.value = camera.far;
-      vrHelper.uniforms.uScreenWidth.value = threeD.offsetWidth * window.devicePixelRatio;
-      vrHelper.uniforms.uScreenHeight.value = threeD.offsetHeight * window.devicePixelRatio;
+    // create GUI
+    buildGUI();
 
-      // update camrea's and interactor's target
-      let centerLPS = stack.worldCenter();
-      camera.lookAt(centerLPS.x, centerLPS.y, centerLPS.z);
-      camera.updateProjectionMatrix();
-      controls.target.set(centerLPS.x, centerLPS.y, centerLPS.z);
-
-      // create GUI
-      buildGUI();
-
-      // good to go
-      ready = true;
-    })
-    .catch((error) => window.console.log(error));
+    // good to go
+    ready = true;
+  })
+  .catch((error) => window.console.log(error));
 
 };
-
-

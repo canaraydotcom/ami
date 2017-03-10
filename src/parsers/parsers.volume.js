@@ -3,66 +3,56 @@
  */
 export default class ParsersVolume {
 
-  constructor(){
-
-    this._rightHanded  = true;
-
+  constructor() {
+    this._rightHanded = true;
   }
 
-  modality(){
-
-    return 'unkown';
-
+  pixelRepresentation() {
+    return 0;
   }
 
-  segmentationType(){
-
+  modality() {
     return 'unknown';
-
   }
 
-  segmentationSegments(){
+  segmentationType() {
+    return 'unknown';
+  }
 
+  segmentationSegments() {
     return [];
-
   }
 
-  referencedSegmentNumber(frameIndex){
-
+  referencedSegmentNumber(frameIndex) {
     return -1;
-
   }
 
-  rightHanded(){
-
+  rightHanded() {
     return this._rightHanded;
+  }
+
+  spacingBetweenSlices() {
+    return null;
+  }
+
+  _decompressUncompressed() {
 
   }
 
-  _decompressUncompressed(){
-    
-  }
-
-  //http://stackoverflow.com/questions/5320439/how-do-i-swap-endian-ness-byte-order-of-a-variable-in-javascript
+  // http://stackoverflow.com/questions/5320439/how-do-i-swap-endian-ness-byte-order-of-a-variable-in-javascript
   _swap16(val) {
-
     return ((val & 0xFF) << 8)
       | ((val >> 8) & 0xFF);
-
   }
 
   _swap32(val) {
-
     return ((val & 0xFF) << 24)
            | ((val & 0xFF00) << 8)
            | ((val >> 8) & 0xFF00)
            | ((val >> 24) & 0xFF);
-
   }
 
   invert() {
-
     return false;
-
   }
 }
