@@ -1,9 +1,9 @@
 /* globals Stats, dat*/
 
 import ControlsTrackball from '../../src/controls/controls.trackball';
-import HelpersLut        from '../../src/helpers/helpers.lut';
-import HelpersVR         from '../../src/helpers/helpers.volumerendering';
-import LoadersVolume     from '../../src/loaders/loaders.volume';
+import HelpersLut from '../../src/helpers/helpers.lut';
+import HelpersVR from '../../src/helpers/helpers.volumerendering';
+import LoadersVolume from '../../src/loaders/loaders.volume';
 
 // standard global letiables
 let controls, renderer, stats, camera, scene, preScene, bgScene, bgCamera, threeD;
@@ -20,7 +20,7 @@ let myStack = {
   alphaCorrection: 0.5,
   frequence: 0,
   amplitude: 0,
-  interpolation: 1
+  interpolation: 1,
 };
 
 function onMouseDown() {
@@ -57,8 +57,8 @@ function onWindowResize() {
 
 function buildGUI() {
   let gui = new dat.GUI({
-    autoPlace: false
-  });
+      autoPlace: false,
+    });
 
   let customContainer = document.getElementById('my-gui-container');
   customContainer.appendChild(gui.domElement);
@@ -288,7 +288,6 @@ void main() {
 }
 
 window.onload = function() {
-
   // init threeJS
   initFirstPass();
   init();
@@ -337,5 +336,4 @@ window.onload = function() {
     ready = true;
   })
   .catch((error) => window.console.log(error));
-
 };
