@@ -10,7 +10,6 @@ let controls, renderer, stats, camera, scene, preScene, bgScene, bgCamera, three
 let vrHelper;
 let lut;
 let ready = false;
-let supportsExtension = true;
 let target;
 
 let myStack = {
@@ -158,10 +157,9 @@ function initFirstPass() {
     alpha: true,
   });
 
-  if (!renderer.extensions.get('WEBGL_depth_texture')) {
-    supportsExtension = false;
+  if (!renderer.extensions.get('MOZ_WEBGL_depth_texture')) {
     alert("webgl depth texture extension not supported");
-    return;
+    // return;
   }
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(threeD.offsetWidth, threeD.offsetHeight);

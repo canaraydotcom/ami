@@ -85,6 +85,7 @@
     "phantomjs": "latest",
     "rimraf": "^2.6.1",
     "shelljs": "latest",
+    "three": "^0.84.0",
     "uglify-js": "^2.7.3",
     "watchify": "3.7.0"
   },

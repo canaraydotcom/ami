@@ -43,7 +43,6 @@ export default class ShadersFragment {
   main() {
     // need to pre-call main to fill up the functions list
     this._main = `
-
 float readDepth () {
     vec2 coord = vec2(gl_FragCoord.x / uScreenWidth, gl_FragCoord.y / uScreenHeight);
     float fragCoordZ = texture2D(uTextureDepth, coord).x;
@@ -59,34 +58,32 @@ void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradien
   intensity = dataValue.r;
 
   // rescale/slope
-  intensity = intensity*uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
+  intensity = intensity * uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
   // window level
   float windowMin = uWindowCenterWidth[0] - uWindowCenterWidth[1] * 0.5;
   intensity = ( intensity - windowMin ) / uWindowCenterWidth[1];
 }
 
 void main(void) {
+
   const int maxIter = 256;
   const float minStepSize = 1.0;
 
   // the ray
   vec3 rayOrigin = cameraPosition;
-  vec3 rayDirection = normalize(vPos.xyz - rayOrigin);
+  vec3 diff = vPos.xyz - rayOrigin;
+  vec3 rayDirection = normalize(diff);
 
   // the Axe-Aligned B-Box
   vec3 AABBMin = vec3(uWorldBBox[0], uWorldBBox[2], uWorldBBox[4]);
   vec3 AABBMax = vec3(uWorldBBox[1], uWorldBBox[3], uWorldBBox[5]);
 
   // Intersection ray/bbox
-  float tNear, tFar;
-  bool intersect = false;
-  ${shadersIntersectBox.api(this, 'rayOrigin', 'rayDirection', 'AABBMin', 'AABBMax', 'tNear', 'tFar', 'intersect')}
-  if (tNear < 0.0) tNear = 0.0;
-
-  float maxZ = readDepth();
+  float tNear = length(diff);
+  float tFar = readDepth();
 
   // init the ray marching
-  float tStep = (min(tFar, maxZ) - tNear) / float(uSteps);
+  float tStep = (tFar - tNear) / float(uSteps);
   tStep = max(minStepSize, tStep);
   vec4 accumulatedColor = vec4(0.0);
   float accumulatedAlpha = 0.0;
@@ -100,20 +97,20 @@ void main(void) {
 
   float currentZ = tNear;
   
-//  gl_FragColor.rgb = vec3((maxZ - uCameraNear) / (uCameraFar - uCameraNear));
+//  gl_FragColor.rgb = vec3((tFar - uCameraNear) / (uCameraFar - uCameraNear));
 //  gl_FragColor.a = 1.0;
 //  return;
 
-  if (currentZ >= maxZ) {
+  if (currentZ >= tFar) {
     gl_FragColor.a = 0.0;
     return;
   }
 
   bool lastStep = false;
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
-    if (currentZ >= maxZ) {
+    if (currentZ >= tFar) {
       lastStep = true;
-      currentVoxel -= stepVector * (currentZ - maxZ);
+      currentVoxel -= stepVector * (currentZ - tFar);
     }
     
     //vec3 currentPosition = rayOrigin + rayDirection * tCurrent;
@@ -145,11 +142,11 @@ void main(void) {
         alphaSample = colorFromLUT.a;
       }
       else{
-        alphaSample = intensity;
-        colorSample.r = colorSample.g = colorSample.b = intensity * alphaSample;
+        alphaSample = intensity * intensity;
+        colorSample.r = colorSample.g = colorSample.b = intensity;
       }
 
-      alphaSample = alphaSample * uAlphaCorrection;
+      alphaSample *= uAlphaCorrection;
       alphaSample *= (1.0 - accumulatedAlpha);
 
       accumulatedColor += alphaSample * colorSample;
@@ -160,7 +157,7 @@ void main(void) {
     currentVoxel += stepVector;
     currentZ += tStep;
 
-    if (currentZ >= tFar || lastStep || rayStep >= uSteps || accumulatedAlpha >= 1.0 ) {
+    if (currentZ >= tFar || lastStep || rayStep >= uSteps || accumulatedAlpha >= 0.999 ) {
       break;
     }
   }

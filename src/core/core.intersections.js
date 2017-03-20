@@ -1,3 +1,5 @@
+import * as THREE from "three"
+
 import Utils from './core.utils';
 import Validators from './core.validators';
 

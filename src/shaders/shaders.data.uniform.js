@@ -2,6 +2,9 @@
 /**
  * @module shaders/data
  */
+
+import * as THREE from "three";
+
 export default class ShadersUniform {
   /**
    * Shaders data uniforms
@@ -25,6 +28,11 @@ export default class ShadersUniform {
         typeGLSL: 'ivec3',
       },
       'uWorldToData': {
+        type: 'm4',
+        value: new THREE.Matrix4(),
+        typeGLSL: 'mat4',
+      },
+      'uVertexOnlyTransform': {
         type: 'm4',
         value: new THREE.Matrix4(),
         typeGLSL: 'mat4',

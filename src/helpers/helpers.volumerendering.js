@@ -1,4 +1,6 @@
 /** * Imports ***/
+import * as THREE from "three";
+
 import ShadersUniform from '../shaders/shaders.vr.uniform';
 import ShadersVertex from '../shaders/shaders.vr.vertex';
 import ShadersFragment from '../shaders/shaders.vr.fragment';
@@ -61,7 +63,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._uniforms.uWorldBBox.value = this._stack.worldBoundingBox();
     this._uniforms.uTextureSize.value = this._stack.textureSize;
     this._uniforms.uTextureContainer.value = this._textures;
-    this._uniforms.uWorldToData.value = this._stack.lps2IJK;
+    this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
     this._uniforms.uNumberOfChannels.value = this._stack.numberOfChannels;
     this._uniforms.uPixelType.value = this._stack.pixelType;
     this._uniforms.uBitsAllocated.value = this._stack.bitsAllocated;
@@ -77,6 +79,15 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
       side: THREE.FrontSide,
       transparent: true,
     });
+  }
+
+  updateMatrix() {
+    super.updateMatrix();
+
+    const inv = new THREE.Matrix4();
+    inv.getInverse(this.matrixWorld);
+    this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
+    this._uniforms.uWorldToData.value.multiply(inv);
   }
 
   _prepareGeometry() {

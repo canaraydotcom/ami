@@ -1,4 +1,6 @@
 /** * Imports ***/
+import * as THREE from "three";
+
 import coreIntersections from '../core/core.intersections';
 
 /**

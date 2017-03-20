@@ -1,4 +1,5 @@
 /** * Imports ***/
+import * as THREE from "three";
 import ModelsBase from '../models/models.base';
 
 /**

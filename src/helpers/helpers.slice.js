@@ -1,4 +1,6 @@
 /** * Imports ***/
+import * as THREE from "three";
+
 import GeometriesSlice from '../geometries/geometries.slice';
 import ShadersUniform from '../shaders/shaders.data.uniform';
 import ShadersVertex from '../shaders/shaders.data.vertex';
@@ -60,6 +62,8 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
     this._mesh = null;
     this._visible = true;
 
+    this._volumeTransform = new THREE.Matrix4();
+
     // update dimensions, center, etc.
     // depending on aaBBSpace
     this._init();
@@ -69,6 +73,27 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
   }
 
   // getters/setters
+
+  get vertexOnlyTransform() {
+    return this._uniforms.uVertexOnlyTransform.value;
+  }
+
+  set vertexOnlyTransform(transform) {
+    this._uniforms.uVertexOnlyTransform.value = transform;
+  }
+
+  get volumeTransform() {
+    return this._volumeTransform.value;
+  }
+
+  set volumeTransform(transform) {
+    this._volumeTransform = transform;
+
+    const inv = new THREE.Matrix4();
+    inv.getInverse(this._volumeTransform);
+    this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
+    this._uniforms.uWorldToData.value.multiply(inv);
+  }
 
   get stack() {
     return this._stack;
@@ -282,14 +307,20 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
       return;
     }
 
+    const invTransform = new THREE.Matrix4();
+    invTransform.getInverse(this._volumeTransform);
+
     // Convenience vars
     try {
+      const toAABB = this._toAABB.clone();
+      toAABB.multiply(invTransform);
+
       this._geometry = new GeometriesSlice(
         this._halfDimensions,
         this._center,
         this._planePosition,
         this._planeDirection,
-        this._toAABB);
+        toAABB);
     } catch (e) {
       window.console.log(e);
       window.console.log('invalid slice geometry - exiting...');
@@ -306,7 +337,8 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
       this._uniforms.uDataDimensions.value = [this._stack.dimensionsIJK.x,
                                                 this._stack.dimensionsIJK.y,
                                                 this._stack.dimensionsIJK.z];
-      this._uniforms.uWorldToData.value = this._stack.lps2IJK;
+      this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
+      this._uniforms.uWorldToData.value.multiply(invTransform);
       this._uniforms.uNumberOfChannels.value = this._stack.numberOfChannels;
       this._uniforms.uPixelType.value = this._stack.pixelType;
       this._uniforms.uBitsAllocated.value = this._stack.bitsAllocated;

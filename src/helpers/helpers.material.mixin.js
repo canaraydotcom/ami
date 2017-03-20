@@ -4,6 +4,9 @@
  * @module helpers/material/mixin
  */
 
+import * as THREE from "three";
+
+
 let HerlpersMaterialMixin = (superclass) => class extends superclass {
 
   _createMaterial(extraOptions) {

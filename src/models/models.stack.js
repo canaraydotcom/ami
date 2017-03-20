@@ -1,4 +1,6 @@
 /** * Imports ***/
+import * as THREE from "three";
+
 import CoreColors from '../core/core.colors';
 import CoreUtils from '../core/core.utils';
 import ModelsBase from '../models/models.base';
