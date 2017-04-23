@@ -44,7 +44,10 @@ export default class ShadersFragment {
     // need to pre-call main to fill up the functions list
     this._main = `
 float readDepth () {
-    vec2 coord = vec2(gl_FragCoord.x / uScreenWidth, gl_FragCoord.y / uScreenHeight);
+    vec2 coord = vec2(
+      (gl_FragCoord.x + uScreenOffsetX) / uScreenWidth, 
+      (gl_FragCoord.y + uScreenOffsetY) / uScreenHeight
+    );
     float fragCoordZ = texture2D(uTextureDepth, coord).x;
     
     return -perspectiveDepthToViewZ( fragCoordZ, uCameraNear, uCameraFar );
@@ -57,8 +60,10 @@ void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradien
 
   intensity = dataValue.r;
 
+  // TODO : remove?
   // rescale/slope
-  intensity = intensity * uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
+  // intensity = intensity * uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
+  
   // window level
   float windowMin = uWindowCenterWidth[0] - uWindowCenterWidth[1] * 0.5;
   intensity = ( intensity - windowMin ) / uWindowCenterWidth[1];
@@ -73,10 +78,6 @@ void main(void) {
   vec3 rayOrigin = cameraPosition;
   vec3 diff = vPos.xyz - rayOrigin;
   vec3 rayDirection = normalize(diff);
-
-  // the Axe-Aligned B-Box
-  vec3 AABBMin = vec3(uWorldBBox[0], uWorldBBox[2], uWorldBBox[4]);
-  vec3 AABBMax = vec3(uWorldBBox[1], uWorldBBox[3], uWorldBBox[5]);
 
   // Intersection ray/bbox
   float tNear = length(diff);
@@ -142,13 +143,14 @@ void main(void) {
         alphaSample = colorFromLUT.a;
       }
       else{
-        alphaSample = intensity * intensity;
-        colorSample.r = colorSample.g = colorSample.b = intensity;
+        alphaSample = clamp(intensity, 0.0, 1.0);
+        colorSample.r = colorSample.g = colorSample.b = alphaSample;
       }
 
-      alphaSample *= uAlphaCorrection;
+   //   alphaSample *= uAlphaCorrection;
       alphaSample *= (1.0 - accumulatedAlpha);
 
+      accumulatedColor *= accumulatedAlpha;
       accumulatedColor += alphaSample * colorSample;
       accumulatedAlpha += alphaSample;
 

@@ -107,7 +107,7 @@ export default class ShadersUniform {
       },
       'uAlphaCorrection': {
         type: 'f',
-        value: 0.5,
+        value: 1,
         typeGLSL: 'float',
       },
       'uScreenWidth': {
@@ -118,6 +118,16 @@ export default class ShadersUniform {
       'uScreenHeight': {
         type: 'f',
         value: 1.0,
+        typeGLSL: 'float',
+      },
+      'uScreenOffsetX': {
+        type: 'f',
+        value: 0.0,
+        typeGLSL: 'float',
+      },
+      'uScreenOffsetY': {
+        type: 'f',
+        value: 0.0,
         typeGLSL: 'float',
       },
       'uFrequence': {
