@@ -11,6 +11,16 @@ export default class ShadersUniform {
    */
   static uniforms() {
     return {
+      'uSliceNormal': {
+        type: 'v3',
+        value: [0, 0, 1],
+        typeGLSL: 'vec3',
+      },
+      'uSliceThickness': {
+        type: 'f',
+        value: 0.5,
+        typeGLSL: 'float',
+      },
       'uTextureSize': {
         type: 'i',
         value: 0,
@@ -99,26 +109,26 @@ export default class ShadersUniform {
         value: 0.,
         typeGLSL: 'float',
       },
-      'uBorderColor': {
-        type: 'v3',
-        value: [1.0, 0.0, 0.5],
-        typeGLSL: 'vec3',
-      },
-      'uBorderWidth': {
-        type: 'f',
-        value: 2.,
-        typeGLSL: 'float',
-      },
-      'uBorderMargin': {
-        type: 'f',
-        value: 2.,
-        typeGLSL: 'float',
-      },
-      'uBorderDashLength': {
-        type: 'f',
-        value: 10.,
-        typeGLSL: 'float',
-      },
+      // 'uBorderColor': {
+      //   type: 'v3',
+      //   value: [1.0, 0.0, 0.5],
+      //   typeGLSL: 'vec3',
+      // },
+      // 'uBorderWidth': {
+      //   type: 'f',
+      //   value: 2.,
+      //   typeGLSL: 'float',
+      // },
+      // 'uBorderMargin': {
+      //   type: 'f',
+      //   value: 2.,
+      //   typeGLSL: 'float',
+      // },
+      // 'uBorderDashLength': {
+      //   type: 'f',
+      //   value: 10.,
+      //   typeGLSL: 'float',
+      // },
     };
   }
 }

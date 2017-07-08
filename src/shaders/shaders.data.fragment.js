@@ -42,41 +42,34 @@ export default class ShadersFragment {
   main() {
     // need to pre-call main to fill up the functions list
     this._main = `
+const int MAX_STEP_COUNT = 10;
+
+const float stepWeight = 1.0 / float(MAX_STEP_COUNT);
+
 void main(void) {
-
-  // draw border if slice is cropped
-  // float uBorderDashLength = 10.;
-
-  if( uCanvasWidth > 0. &&
-      ((gl_FragCoord.x > uBorderMargin && (gl_FragCoord.x - uBorderMargin) < uBorderWidth) ||
-       (gl_FragCoord.x < (uCanvasWidth - uBorderMargin) && (gl_FragCoord.x + uBorderMargin) > (uCanvasWidth - uBorderWidth) ))){
-    float valueY = mod(gl_FragCoord.y, 2. * uBorderDashLength);
-    if( valueY < uBorderDashLength && gl_FragCoord.y > uBorderMargin && gl_FragCoord.y < (uCanvasHeight - uBorderMargin) ){
-      gl_FragColor = vec4(uBorderColor, 1.);
-      return;
-    }
-  }
-
-  if( uCanvasHeight > 0. &&
-      ((gl_FragCoord.y > uBorderMargin && (gl_FragCoord.y - uBorderMargin) < uBorderWidth) ||
-       (gl_FragCoord.y < (uCanvasHeight - uBorderMargin) && (gl_FragCoord.y + uBorderMargin) > (uCanvasHeight - uBorderWidth) ))){
-    float valueX = mod(gl_FragCoord.x, 2. * uBorderDashLength);
-    if( valueX < uBorderDashLength && gl_FragCoord.x > uBorderMargin && gl_FragCoord.x < (uCanvasWidth - uBorderMargin) ){
-      gl_FragColor = vec4(uBorderColor, 1.);
-      return;
-    }
-  }
+  // TODO : do this in the vertex shader or compute it as uniforms?
+  float stepSize = uSliceThickness / float(MAX_STEP_COUNT);
+  vec3 step = uSliceNormal * stepSize;
 
   // get texture coordinates of current pixel
+  // TODO : this should be possible in the vertex shader
   vec4 dataCoordinates = uWorldToData * vPos;
-  vec3 currentVoxel = vec3(dataCoordinates.x, dataCoordinates.y, dataCoordinates.z);
-  vec4 dataValue = vec4(0., 0., 0., 0.);
-  vec3 gradient = vec3(0., 0., 0.);
-  ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}
+  
+  vec3 currentVoxel = dataCoordinates.xyz - uSliceNormal * uSliceThickness * 0.5;
+  vec4 dataValue = vec4(0.0);
+  vec3 gradient = vec3(0.0);
+  float intensity = 0.0;
+  for (int i = 0; i < MAX_STEP_COUNT; ++i) {
+    ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
+    intensity += dataValue.r;
+    currentVoxel += step;
+  }
+  
+  intensity *= stepWeight;
 
-  // how do we deal wil more than 1 channel?
-  if(uNumberOfChannels == 1){
-    float intensity = dataValue.r;
+// TODO : this can probably removed since it can easily be implemented by the LUT. If this is part of the volume file it should better be applied once on the image data.
+//  how do we deal with more than 1 channel?
+//  if(uNumberOfChannels == 1){
 
     // rescale/slope
     intensity = intensity*uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
@@ -87,7 +80,7 @@ void main(void) {
 
     dataValue.r = dataValue.g = dataValue.b = intensity;
     dataValue.a = 1.0;
-  }
+//  }
 
   // Apply LUT table...
   //

@@ -103,6 +103,14 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
     this._stack = stack;
   }
 
+  get thickness() {
+    return this._uniforms.uSliceThickness.value;
+  }
+
+  set thickness(value) {
+    this._uniforms.uSliceThickness.value = value;
+  }
+
   get windowWidth() {
     return this._windowWidth;
   }
@@ -205,6 +213,7 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
 
   set planeDirection(direction) {
     this._planeDirection = direction;
+    this._uniforms.uSliceNormal.value = direction;
     this._update();
   }
 
