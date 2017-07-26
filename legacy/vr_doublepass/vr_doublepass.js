@@ -320,7 +320,6 @@ window.onload = function() {
     lut.lutsO = HelpersLut.presetLutsO();
 
     uniformsSecondPass.uTextureLUT.value = lut.texture;
-    uniformsSecondPass.uLut.value = 1;
     uniformsSecondPass.uAlphaCorrection.value = myStack.alphaCorrection;
 
     let materialSecondPass = new THREE.ShaderMaterial({

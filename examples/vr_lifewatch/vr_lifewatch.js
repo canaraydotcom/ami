@@ -228,7 +228,6 @@ window.onload = function() {
     lut.lutsO = HelpersLut.presetLutsO();
     // update related uniforms
     vrHelper.uniforms.uTextureLUT.value = lut.texture;
-    vrHelper.uniforms.uLut.value = 1;
 
     // update camrea's and interactor's target
     let centerLPS = stack.worldCenter();

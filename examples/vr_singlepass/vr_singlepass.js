@@ -313,7 +313,6 @@ window.onload = function() {
     lut.lutsO = HelpersLut.presetLutsO();
     // update related uniforms
     vrHelper.uniforms.uTextureLUT.value = lut.texture;
-    vrHelper.uniforms.uLut.value = 1;
     vrHelper.uniforms.uSteps.value = myStack.steps;
     vrHelper.uniforms.uTextureDepth.value = target.depthTexture;
     vrHelper.uniforms.uCameraNear.value = camera.near;

@@ -220,7 +220,6 @@ window.onload = function() {
     layer1LutUpdate.onChange(function(value) {
       lutLayer1.lut = value;
       // propagate to shaders
-      uniformsLayer1.uLut.value = 1;
       uniformsLayer1.uTextureLUT.value = lutLayer1.texture;
     });
 

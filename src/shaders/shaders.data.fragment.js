@@ -41,6 +41,7 @@ export default class ShadersFragment {
 
   main() {
     // need to pre-call main to fill up the functions list
+    // language=GLSL
     this._main = `
 const int MAX_STEP_COUNT = 10;
 
@@ -114,6 +115,7 @@ void main(void) {
     // shaderInterpolation.inline(args) //true/false
     // shaderInterpolation.functions(args)
 
+    // language=GLSL
     return `
 // uniforms
 ${this.uniforms()}

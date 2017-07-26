@@ -1,4 +1,3 @@
-/** * Imports ***/
 import * as THREE from "three";
 
 import ShadersUniform from '../shaders/shaders.vr.uniform';
@@ -64,12 +63,15 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._uniforms.uTextureSize.value = this._stack.textureSize;
     this._uniforms.uTextureContainer.value = this._textures;
     this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
-    this._uniforms.uNumberOfChannels.value = this._stack.numberOfChannels;
     this._uniforms.uPixelType.value = this._stack.pixelType;
     this._uniforms.uBitsAllocated.value = this._stack.bitsAllocated;
     this._uniforms.uPackedPerPixel.value = this._stack.packedPerPixel;
-    this._uniforms.uWindowCenterWidth.value = [offset + this._stack.windowCenter, this._stack.windowWidth * 0.8];
-    this._uniforms.uRescaleSlopeIntercept.value = [this._stack.rescaleSlope, this._stack.rescaleIntercept];
+    this._uniforms.uWindowMinWidth.value = [
+      offset + this._stack.windowCenter - this._stack.windowWidth * 0.4,
+      this._stack.windowWidth * 0.8
+    ];
+    // TODO : convert this to window min and width
+    // this._uniforms.uRescaleSlopeIntercept.value = [this._stack.rescaleSlope, this._stack.rescaleIntercept];
     this._uniforms.uDataDimensions.value = [this._stack.dimensionsIJK.x,
                                                 this._stack.dimensionsIJK.y,
                                                 this._stack.dimensionsIJK.z];

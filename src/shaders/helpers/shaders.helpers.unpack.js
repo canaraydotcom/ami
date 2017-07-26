@@ -11,7 +11,7 @@ class Unpack extends ShadersBase {
     this._offset = 'offset';
     this._unpackedData = 'unpackedData';
 
-    this._base._uniforms ={
+    this._base._uniforms = {
       uNumberOfChannels: {
         value: 1,
       },
@@ -38,29 +38,25 @@ class Unpack extends ShadersBase {
   computeDefinition() {
     // fun stuff
     let content = '';
-    if(this._base._uniforms.uNumberOfChannels.value === 1) {
-      switch(this._base._uniforms.uBitsAllocated.value) {
+    switch (this._base._uniforms.uBitsAllocated.value) {
 
-        case 1:
-        case 8:
-          content = this.upack8();
-          break;
+      case 1:
+      case 8:
+        content = this.upack8();
+        break;
 
-        case 16:
-          content = this.upack16();
-          break;
+      case 16:
+        content = this.upack16();
+        break;
 
-        case 32:
-          content = this.upack32();
-          break;
+      case 32:
+        content = this.upack32();
+        break;
 
-        default:
-          content = this.upackDefault();
-          break;
+      default:
+        content = this.upackDefault();
+        break;
 
-      }
-    } else{
-      content = this.upackIdentity();
     }
 
     this._definition = `
@@ -94,7 +90,7 @@ uInt16(
   }
 
   upack32() {
-    if(this._base._uniforms.uPixelType.value === 0) {
+    if (this._base._uniforms.uPixelType.value === 0) {
       this._base._functions['uInt32'] = this.uInt32();
 
       return `
@@ -105,7 +101,7 @@ uInt32(
   packedData.a,
   unpackedData.x);
       `;
-    } else{
+    } else {
       this._base._functions['uFloat32'] = this.uFloat32();
 
       return `

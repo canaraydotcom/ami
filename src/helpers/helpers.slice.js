@@ -1,4 +1,3 @@
-/** * Imports ***/
 import * as THREE from "three";
 
 import GeometriesSlice from '../geometries/geometries.slice';

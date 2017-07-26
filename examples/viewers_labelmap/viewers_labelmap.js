@@ -493,7 +493,6 @@ window.onload = function() {
       [[0, 1], [1, 1]]);
     lutLayer0.luts = HelpersLut.presetLuts();
     lutLayer0.lut = 'random';
-    stackHelper.slice.lut = 1;
     stackHelper.slice.lutTexture = lutLayer0.texture;
 
     lutLayer1 = new HelpersLut(
@@ -503,7 +502,6 @@ window.onload = function() {
       stack2.segmentationLUT,
       stack2.segmentationLUTO,
       true);
-    uniformsLayer1.uLut.value = 1;
     uniformsLayer1.uTextureLUT.value = lutLayer1.texture;
 
     buildGUI(stackHelper);

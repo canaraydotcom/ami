@@ -426,7 +426,6 @@ function handleSeries() {
     stack2.segmentationLUT,
     stack2.segmentationLUTO,
     true);
-  uniformsLayer1.uLut.value = 1;
   uniformsLayer1.uTextureLUT.value = lutLayer1.texture;
 
   buildGUI(stackHelper);
