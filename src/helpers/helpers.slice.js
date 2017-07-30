@@ -330,8 +330,8 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
         this._planeDirection,
         toAABB);
     } catch (e) {
-      window.console.log(e);
-      window.console.log('invalid slice geometry - exiting...');
+      // window.console.log(e);
+      // window.console.log('invalid slice geometry - exiting...');
       return;
     }
 

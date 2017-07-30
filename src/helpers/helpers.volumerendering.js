@@ -50,13 +50,6 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
   }
 
   _prepareMaterial() {
-    // compensate for the offset to only pass > 0 values to shaders
-    // models > models.stack.js : _packTo8Bits
-    let offset = 0;
-    if (this._stack._minMax[0] < 0) {
-      offset = this._stack._minMax[0];
-    }
-
     // uniforms
     this._uniforms = ShadersUniform.uniforms();
     this._uniforms.uWorldBBox.value = this._stack.worldBoundingBox();
@@ -67,14 +60,15 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._uniforms.uBitsAllocated.value = this._stack.bitsAllocated;
     this._uniforms.uPackedPerPixel.value = this._stack.packedPerPixel;
     this._uniforms.uWindowMinWidth.value = [
-      offset + this._stack.windowCenter - this._stack.windowWidth * 0.4,
+      this._stack.windowCenter - this._stack.windowWidth * 0.4,
       this._stack.windowWidth * 0.8
     ];
-    // TODO : convert this to window min and width
-    // this._uniforms.uRescaleSlopeIntercept.value = [this._stack.rescaleSlope, this._stack.rescaleIntercept];
-    this._uniforms.uDataDimensions.value = [this._stack.dimensionsIJK.x,
-                                                this._stack.dimensionsIJK.y,
-                                                this._stack.dimensionsIJK.z];
+
+    this._uniforms.uDataDimensions.value = [
+      this._stack.dimensionsIJK.x,
+      this._stack.dimensionsIJK.y,
+      this._stack.dimensionsIJK.z
+    ];
     this._uniforms.uInterpolation.value = this._interpolation;
 
     this._createMaterial({

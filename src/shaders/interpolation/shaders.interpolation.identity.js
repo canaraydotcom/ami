@@ -27,6 +27,7 @@ class InterpolationIdentity extends ShadersBase {
 
 
   computeDefinition() {
+    // language=GLSL
     this._definition = `
 void ${this._name}(in vec3 currentVoxel, out vec4 dataValue){
   // lower bound

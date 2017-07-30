@@ -2,16 +2,16 @@
 
 // Slicer way to handle images
 // should follow it...
- // 897   if ( (this->IndexSeriesInstanceUIDs[k] != idxSeriesInstanceUID && this->IndexSeriesInstanceUIDs[k] >= 0 && idxSeriesInstanceUID >= 0) ||
- // 898        (this->IndexContentTime[k] != idxContentTime && this->IndexContentTime[k] >= 0 && idxContentTime >= 0) ||
- // 899        (this->IndexTriggerTime[k] != idxTriggerTime && this->IndexTriggerTime[k] >= 0 && idxTriggerTime >= 0) ||
- // 900        (this->IndexEchoNumbers[k] != idxEchoNumbers && this->IndexEchoNumbers[k] >= 0 && idxEchoNumbers >= 0) ||
- // 901        (this->IndexDiffusionGradientOrientation[k] != idxDiffusionGradientOrientation  && this->IndexDiffusionGradientOrientation[k] >= 0 && idxDiffusionGradientOrientation >= 0) ||
- // 902        (this->IndexSliceLocation[k] != idxSliceLocation && this->IndexSliceLocation[k] >= 0 && idxSliceLocation >= 0) ||
- // 903        (this->IndexImageOrientationPatient[k] != idxImageOrientationPatient && this->IndexImageOrientationPatient[k] >= 0 && idxImageOrientationPatient >= 0) )
- // 904     {
- // 905       continue;
- // 906     }
+// 897   if ( (this->IndexSeriesInstanceUIDs[k] != idxSeriesInstanceUID && this->IndexSeriesInstanceUIDs[k] >= 0 && idxSeriesInstanceUID >= 0) ||
+// 898        (this->IndexContentTime[k] != idxContentTime && this->IndexContentTime[k] >= 0 && idxContentTime >= 0) ||
+// 899        (this->IndexTriggerTime[k] != idxTriggerTime && this->IndexTriggerTime[k] >= 0 && idxTriggerTime >= 0) ||
+// 900        (this->IndexEchoNumbers[k] != idxEchoNumbers && this->IndexEchoNumbers[k] >= 0 && idxEchoNumbers >= 0) ||
+// 901        (this->IndexDiffusionGradientOrientation[k] != idxDiffusionGradientOrientation  && this->IndexDiffusionGradientOrientation[k] >= 0 && idxDiffusionGradientOrientation >= 0) ||
+// 902        (this->IndexSliceLocation[k] != idxSliceLocation && this->IndexSliceLocation[k] >= 0 && idxSliceLocation >= 0) ||
+// 903        (this->IndexImageOrientationPatient[k] != idxImageOrientationPatient && this->IndexImageOrientationPatient[k] >= 0 && idxImageOrientationPatient >= 0) )
+// 904     {
+// 905       continue;
+// 906     }
 
 // http://brainder.org/2012/09/23/the-nifti-file-format/
 
@@ -27,9 +27,9 @@ export default class ParsersNifti extends ParsersVolume {
     super();
 
     /**
-      * @member
-      * @type {arraybuffer}
-    */
+     * @member
+     * @type {arraybuffer}
+     */
     this._id = id;
     this._arrayBuffer = data.buffer;
     this._url = data.url;
@@ -89,7 +89,7 @@ export default class ParsersNifti extends ParsersVolume {
   }
 
   pixelType(frameIndex = 0) {
-        // papaya.volume.nifti.NIFTI_TYPE_UINT8           = 2;
+    // papaya.volume.nifti.NIFTI_TYPE_UINT8           = 2;
     // papaya.volume.nifti.NIFTI_TYPE_INT16           = 4;
     // papaya.volume.nifti.NIFTI_TYPE_INT32           = 8;
     // papaya.volume.nifti.NIFTI_TYPE_FLOAT32        = 16;
@@ -108,7 +108,7 @@ export default class ParsersNifti extends ParsersVolume {
     // 0 integer, 1 float
 
     let pixelType = 0;
-    if(this._dataSet.datatypeCode === 16 ||
+    if (this._dataSet.datatypeCode === 16 ||
       this._dataSet.datatypeCode === 64 ||
       this._dataSet.datatypeCode === 1536) {
       pixelType = 1;
@@ -125,7 +125,7 @@ export default class ParsersNifti extends ParsersVolume {
       this._dataSet.pixDims[1],
       this._dataSet.pixDims[2],
       this._dataSet.pixDims[3],
-      ];
+    ];
   }
 
   sliceThickness() {
@@ -137,44 +137,50 @@ export default class ParsersNifti extends ParsersVolume {
     // window.console.log(this._dataSet);
     // http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h
     // http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
-    if(this._dataSet.qform_code > 0) {
+    if (this._dataSet.qform_code > 0) {
       // https://github.com/Kitware/ITK/blob/master/Modules/IO/NIFTI/src/itkNiftiImageIO.cxx
       let a = 0.0, b = this._dataSet.quatern_b, c = this._dataSet.quatern_c, d = this._dataSet.quatern_d;
       // compute a
-      a = 1.0 - (b*b + c*c + d*d);
-      if(a < 0.0000001) {
-                   /* special case */
+      a = 1.0 - (b * b + c * c + d * d);
+      if (a < 0.0000001) {
+        /* special case */
 
-        a = 1.0 / Math.sqrt(b*b+c*c+d*d);
-        b *= a; c *= a; d *= a;        /* normalize (b,c,d) vector */
-        a = 0.0;                       /* a = 0 ==> 180 degree rotation */
+        a = 1.0 / Math.sqrt(b * b + c * c + d * d);
+        b *= a;
+        c *= a;
+        d *= a;
+        /* normalize (b,c,d) vector */
+        a = 0.0;
+        /* a = 0 ==> 180 degree rotation */
       } else {
-        a = Math.sqrt(a);                     /* angle = 2*arccos(a) */
+        a = Math.sqrt(a);
+        /* angle = 2*arccos(a) */
       }
 
-      if(this._dataSet.pixDims[0] < 0.0) {
+      if (this._dataSet.pixDims[0] < 0.0) {
         this._rightHanded = false;
       }
 
-       return [
-          -(a*a+b*b-c*c-d*d),
-          -2*(b*c+a*d),
-          2*(b*d-a*c),
-          -2*(b*c-a*d),
-          -(a*a+c*c-b*b-d*d),
-          2*(c*d+a*b),
-        ];
-    }else if(this._dataSet.sform_code > 0) {
-      console.log('sform > 0');
+      return [
+        -(a * a + b * b - c * c - d * d),
+        -2 * (b * c + a * d),
+        2 * (b * d - a * c),
+        -2 * (b * c - a * d),
+        -(a * a + c * c - b * b - d * d),
+        2 * (c * d + a * b),
+      ];
+
+    } else if (this._dataSet.sform_code > 0) {
+      console.log("TODO : implement sform_code");
 
       let sx = this._dataSet.srow_x, sy = this._dataSet.srow_y, sz = this._dataSet.srow_z;
       // fill IJKToRAS
       // goog.vec.Mat4.setRowValues(IJKToRAS, 0, sx[0], sx[1], sx[2], sx[3]);
       // goog.vec.Mat4.setRowValues(IJKToRAS, 1, sy[0], sy[1], sy[2], sy[3]);
       // goog.vec.Mat4.setRowValues(IJKToRAS, 2, sz[0], sz[1], sz[2], sz[3]);
-    } else if(this._dataSet.qform_code === 0) {
-            console.log('qform === 0');
 
+    } else if (this._dataSet.qform_code === 0) {
+      throw Error("do we need to implement something here?");
 
       // fill IJKToRAS
       // goog.vec.Mat4.setRowValues(IJKToRAS, 0, MRI.pixdim[1], 0, 0, 0);

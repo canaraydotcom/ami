@@ -67,8 +67,7 @@ void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradien
 
 void main(void) {
 
-  const int maxIter = 256;
-  const float minStepSize = 1.0;
+  const int maxIter = 512;
 
   // the ray
   vec3 rayOrigin = cameraPosition;
@@ -80,17 +79,19 @@ void main(void) {
   float tFar = readDepth();
 
   // init the ray marching
-  float tStep = (tFar - tNear) / float(uSteps);
-  tStep = max(minStepSize, tStep);
+  float stepSize = (tFar - tNear) / float(uSteps);
   vec3 accumulatedColor = vec3(0.0);
   float accumulatedAlpha = 0.0;
-
+  
+  // TODO : calculate from stepSize and voxelSize
+  float alphaScaleFactor = 1.0;
+  
   vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
 
   vec3 rayStartPosition = rayOrigin + rayDirection * tNear;
   vec3 currentVoxel = vec3(uWorldToData * vec4(rayStartPosition, 1.0));
 
-  vec3 stepVector = mat3(uWorldToData) * (rayDirection * tStep);
+  vec3 stepVector = mat3(uWorldToData) * (rayDirection * stepSize);
 
   float currentZ = tNear;
   
@@ -113,22 +114,22 @@ void main(void) {
       vec3 gradient = vec3(0.0);
       getIntensity(currentVoxel, intensity, gradient);
 
-      vec4 colorFromLUT = texture2D( uTextureLUT, vec2( intensity, 1.0) );
+      vec4 colorFromLUT = texture2D( uTextureLUT, vec2( intensity, 0.5) );
 
       vec3 colorSample = colorFromLUT.rgb;
       float alphaSample = colorFromLUT.a;
 
    //   alphaSample *= uAlphaCorrection;
       alphaSample *= (1.0 - accumulatedAlpha);
+      alphaSample *= alphaScaleFactor;
 
-      accumulatedColor *= accumulatedAlpha;
       accumulatedColor += alphaSample * colorSample;
       accumulatedAlpha += alphaSample;
 
     }
 
     currentVoxel += stepVector;
-    currentZ += tStep;
+    currentZ += stepSize;
 
     if (currentZ >= tFar || lastStep || rayStep >= uSteps || accumulatedAlpha >= 0.999 ) {
       break;

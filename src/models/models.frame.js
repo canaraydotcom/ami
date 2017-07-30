@@ -164,6 +164,25 @@ export default class ModelsFrame extends ModelsBase {
     return false;
   }
 
+  normalizeIntensities(min, max) {
+    const span = max - min;
+
+    // TODO : this takes more memory. does it matter?
+    if (!(this._pixelData instanceof Float32Array)) {
+      this._pixelData = Float32Array.from(this._pixelData);
+      this._bitsAllocated = 32;
+    }
+
+    for (let i = 0; i < this._pixelData.length; i++) {
+      let value = (this._pixelData[i] - min) / span;
+      this._pixelData[i] = value;
+    }
+
+    this._minMax = [0.0, 1.0];
+    this._windowWidth = 1.0;
+    this._windowCenter = 0.5;
+  }
+
   get rows() {
     return this._rows;
   }

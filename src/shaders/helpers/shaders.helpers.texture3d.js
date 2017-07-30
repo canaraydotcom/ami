@@ -25,6 +25,7 @@ class Texture3d extends ShadersBase {
 
 
   computeDefinition() {
+    // language=GLSL
     this._definition = `
 void ${this._name}(in ivec3 dataCoordinates, out vec4 dataValue, out int offset){
     
