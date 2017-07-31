@@ -60,7 +60,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._uniforms.uBitsAllocated.value = this._stack.bitsAllocated;
     this._uniforms.uPackedPerPixel.value = this._stack.packedPerPixel;
     this._uniforms.uWindowMinWidth.value = [
-      this._stack.windowCenter - this._stack.windowWidth * 0.4,
+      this._stack.windowMin + this._stack.windowWidth * 0.1,
       this._stack.windowWidth * 0.8
     ];
 

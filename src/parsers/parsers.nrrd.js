@@ -175,7 +175,7 @@ export default class ParsersNifti extends ParsersVolume {
     return frameIndex;
   }
 
-  windowCenter(frameIndex = 0) {
+  windowMin(frameIndex = 0) {
     // calc min and calc max
     return null;
   }

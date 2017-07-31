@@ -204,8 +204,8 @@ export default class LoadersVolumes extends LoadersBase {
     frame.dimensionIndexValues = dataParser.dimensionIndexValues(i);
     frame.bitsAllocated = dataParser.bitsAllocated(i);
     frame.instanceNumber = dataParser.instanceNumber(i);
-    frame.windowCenter = dataParser.windowCenter(i);
     frame.windowWidth = dataParser.windowWidth(i);
+    frame.windowMin = dataParser.windowCenter(i) - frame.windowWidth * 0.5;
     frame.rescaleSlope = dataParser.rescaleSlope(i);
     frame.rescaleIntercept = dataParser.rescaleIntercept(i);
     // should pass frame index for consistency...

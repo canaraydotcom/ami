@@ -48,7 +48,7 @@ export default class ModelsStack extends ModelsBase {
     this._nbTextures = 7; // HIGH RES..
     this._rawData = [];
 
-    this._windowCenter = 0;
+    this._windowMin = 0;
     this._windowWidth = 0;
 
     this._rescaleSlope = 1;
@@ -243,8 +243,7 @@ export default class ModelsStack extends ModelsBase {
     let width = this._minMax[1] - this._minMax[0];
     this._windowWidth = width;
 
-    let center = this._minMax[0] + width / 2;
-    this._windowCenter = center;
+    this._windowMin = this._minMax[0];
 
     this._bitsAllocated = this._frame[0].bitsAllocated;
     this._prepared = true;
@@ -851,12 +850,12 @@ return a.sopInstanceUID - b.sopInstanceUID;
     this._windowWidth = windowWidth;
   }
 
-  get windowCenter() {
-    return this._windowCenter;
+  get windowMin() {
+    return this._windowMin;
   }
 
-  set windowCenter(windowCenter) {
-    this._windowCenter = windowCenter;
+  set windowMin(windowMin) {
+    this._windowMin = windowMin;
   }
 
   get rescaleSlope() {

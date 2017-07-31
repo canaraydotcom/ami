@@ -36,7 +36,7 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
     // starts at 0
     this._index = index;
     this._windowWidth = null;
-    this._windowCenter = null;
+    this._windowMin = null;
     this._rescaleSlope = null;
     this._rescaleIntercept = null;
 
@@ -119,12 +119,12 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
     this.updateIntensitySettingsUniforms();
   }
 
-  get windowCenter() {
-    return this._windowCenter;
+  get windowMin() {
+    return this._windowMin;
   }
 
-  set windowCenter(windowCenter) {
-    this._windowCenter = windowCenter;
+  set windowMin(windowMin) {
+    this._windowMin = windowMin;
     this.updateIntensitySettingsUniforms();
   }
 
@@ -347,7 +347,6 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
                                                 this._stack.dimensionsIJK.z];
       this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
       this._uniforms.uWorldToData.value.multiply(invTransform);
-      this._uniforms.uNumberOfChannels.value = this._stack.numberOfChannels;
       this._uniforms.uPixelType.value = this._stack.pixelType;
       this._uniforms.uBitsAllocated.value = this._stack.bitsAllocated;
       this._uniforms.uPackedPerPixel.value = this._stack.packedPerPixel;
@@ -379,13 +378,13 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
   updateIntensitySettings() {
     // if auto, get from frame index
     if (this._intensityAuto) {
-      this.updateIntensitySetting('windowCenter');
+      this.updateIntensitySetting('windowMin');
       this.updateIntensitySetting('windowWidth');
       this.updateIntensitySetting('rescaleSlope');
       this.updateIntensitySetting('rescaleIntercept');
     } else {
-      if (this._windowCenter === null) {
-        this._windowCenter = this._stack.windowCenter;
+      if (this._windowMin === null) {
+        this._windowMin = this._stack.windowMin;
       }
 
       if (this.__windowWidth === null) {
@@ -403,16 +402,9 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
   }
 
   updateIntensitySettingsUniforms() {
-    // compensate for the offset to only pass > 0 values to shaders
-    // models > models.stack.js : _packTo8Bits
-    let offset = 0;
-    if (this._stack._minMax[0] < 0) {
-      offset -= this._stack._minMax[0];
-    }
 
     // set slice window center and width
-    this._uniforms.uRescaleSlopeIntercept.value = [this._rescaleSlope, this._rescaleIntercept];
-    this._uniforms.uWindowCenterWidth.value = [offset + this._windowCenter, this._windowWidth];
+    this._uniforms.uWindowMinWidth.value = [this._windowMin, this._windowWidth];
 
     // invert
     this._uniforms.uInvert.value = this._invert === true ? 1 : 0;

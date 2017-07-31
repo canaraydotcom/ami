@@ -30,7 +30,7 @@ export default class ModelsFrame extends ModelsBase {
     this._pixelData = null;
 
     this._instanceNumber = null;
-    this._windowCenter = null;
+    this._windowMin = null;
     this._windowWidth = null;
     this._rescaleSlope = null;
     this._rescaleIntercept = null;
@@ -180,7 +180,7 @@ export default class ModelsFrame extends ModelsBase {
 
     this._minMax = [0.0, 1.0];
     this._windowWidth = 1.0;
-    this._windowCenter = 0.5;
+    this._windowMin = 0.0;
   }
 
   get rows() {
@@ -239,12 +239,12 @@ export default class ModelsFrame extends ModelsBase {
     this._windowWidth = windowWidth;
   }
 
-  get windowCenter() {
-    return this._windowCenter;
+  get windowMin() {
+    return this._windowMin;
   }
 
-  set windowCenter(windowCenter) {
-    this._windowCenter = windowCenter;
+  set windowMin(windowMin) {
+    this._windowMin = windowMin;
   }
 
   get rescaleSlope() {

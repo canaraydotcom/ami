@@ -47,22 +47,11 @@ export default class ShadersUniform {
         value: new THREE.Matrix4(),
         typeGLSL: 'mat4',
       },
-      'uWindowCenterWidth': {
+      'uWindowMinWidth': {
         type: 'fv1',
         value: [0.0, 0.0],
         typeGLSL: 'float',
         length: 2,
-      },
-      'uRescaleSlopeIntercept': {
-        type: 'fv1',
-        value: [0.0, 0.0],
-        typeGLSL: 'float',
-        length: 2,
-      },
-      'uNumberOfChannels': {
-        type: 'i',
-        value: 1,
-        typeGLSL: 'int',
       },
       'uBitsAllocated': {
         type: 'i',

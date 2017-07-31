@@ -68,44 +68,20 @@ void main(void) {
   
   intensity *= stepWeight;
 
-// TODO : this can probably removed since it can easily be implemented by the LUT. If this is part of the volume file it should better be applied once on the image data.
-//  how do we deal with more than 1 channel?
-//  if(uNumberOfChannels == 1){
-
-    // rescale/slope
-    intensity = intensity*uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
-
-    float windowMin = uWindowCenterWidth[0] - uWindowCenterWidth[1] * 0.5;
-    float windowMax = uWindowCenterWidth[0] + uWindowCenterWidth[1] * 0.5;
-    intensity = ( intensity - windowMin ) / uWindowCenterWidth[1];
-
-    dataValue.r = dataValue.g = dataValue.b = intensity;
-    dataValue.a = 1.0;
-//  }
+  intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
+  intensity = clamp(intensity, 0.0, 1.0);
 
   // Apply LUT table...
-  //
-  if(uLut == 1){
-    // should opacity be grabbed there?
-    dataValue = texture2D( uTextureLUT, vec2( dataValue.r , 1.0) );
-  }
+  // should opacity be grabbed there?
+  dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
   if(uInvert == 1){
-    dataValue = vec4(1.) - dataValue;
+    dataValue = vec4(1.0) - dataValue;
     // how do we deal with that and opacity?
-    dataValue.a = 1.;
+    dataValue.a = 1.0;
   }
 
   gl_FragColor = dataValue;
-
-    // if on edge, draw line
-  // float xPos = gl_FragCoord.x/512.;
-  // float yPos = gl_FragCoord.y/512.;
-  // if( xPos < 0.05 || xPos > .95 || yPos < 0.05 || yPos > .95){
-  //   gl_FragColor = vec4(xPos, yPos, 0., 1.);//dataValue;
-  //   //return;
-  // }
-
 }
    `;
   }

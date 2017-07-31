@@ -12,9 +12,6 @@ class Unpack extends ShadersBase {
     this._unpackedData = 'unpackedData';
 
     this._base._uniforms = {
-      uNumberOfChannels: {
-        value: 1,
-      },
       uBitsAllocated: {
         value: 16,
       },
@@ -148,6 +145,7 @@ void uInt32(in float r, in float g, in float b, in float a, out float value){
   }
 
   uFloat32() {
+    // language=GLSL
     return `
 void uFloat32(in float r, in float g, in float b, in float a, out float value){
 

@@ -57,6 +57,7 @@ export default class ShadersFragment {
   main(){
   
     // need to pre-call main to fill up the functions list
+    // language=GLSL
     this._main = `
 vec4 getWorldCoordinates() {
   vec2 xy = texture2D(uCurveCoordinates, vec2(vUv.x, 0.5)).xy;
@@ -71,32 +72,19 @@ void main(void) {
   vec3 gradient = vec3(0.0);
   ${shadersInterpolation( this, 'currentVoxel', 'dataValue', 'gradient' )}
 
-  // how do we deal wil more than 1 channel?
-  if(uNumberOfChannels == 1){
-    float intensity = dataValue.r;
+  float intensity = dataValue.r;
 
-    // rescale/slope
-    intensity = intensity*uRescaleSlopeIntercept[0] + uRescaleSlopeIntercept[1];
-
-    float windowMin = uWindowCenterWidth[0] - uWindowCenterWidth[1] * 0.5;
-    float windowMax = uWindowCenterWidth[0] + uWindowCenterWidth[1] * 0.5;
-    intensity = ( intensity - windowMin ) / uWindowCenterWidth[1];
-
-    dataValue.r = dataValue.g = dataValue.b = intensity;
-    dataValue.a = 1.0;
-  }
+  intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
+  intensity = clamp(intensity, 0.0, 1.0);
 
   // Apply LUT table...
-  //
-  if(uLut == 1){
-    // should opacity be grabbed there?
-    dataValue = texture2D( uTextureLUT, vec2( dataValue.r , 1.0) );
-  }
+  // should opacity be grabbed there?
+  dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
   if(uInvert == 1){
     dataValue = vec4(1.) - dataValue;
     // how do we deal with that and opacity?
-    dataValue.a = 1.;
+    dataValue.a = 1.0;
   }
 
   gl_FragColor = dataValue;
