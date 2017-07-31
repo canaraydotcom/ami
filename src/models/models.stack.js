@@ -393,6 +393,8 @@ export default class ModelsStack extends ModelsBase {
     this._rescaleIntercept /= span;
 
     this._minMax = [0.0, 1.0];
+
+    this._pixelType = this._frame[0].pixelType
   }
 
   computeIJK2LPS() {

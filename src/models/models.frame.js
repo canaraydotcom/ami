@@ -171,6 +171,7 @@ export default class ModelsFrame extends ModelsBase {
     if (!(this._pixelData instanceof Float32Array)) {
       this._pixelData = Float32Array.from(this._pixelData);
       this._bitsAllocated = 32;
+      this._pixelType = 1;
     }
 
     for (let i = 0; i < this._pixelData.length; i++) {

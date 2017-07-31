@@ -123,6 +123,8 @@ void main(void) {
       alphaSample *= (1.0 - accumulatedAlpha);
       alphaSample *= alphaScaleFactor;
 
+//      accumulatedColor *= accumulatedAlpha;
+      
       accumulatedColor += alphaSample * colorSample;
       accumulatedAlpha += alphaSample;
 
