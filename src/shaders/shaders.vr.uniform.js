@@ -114,6 +114,7 @@ export default class ShadersUniform {
         value: 0.0,
         typeGLSL: 'float',
       },
+      // TODO : is this used anywhere??
       'uFrequence': {
         type: 'f',
         value: 0.0,

@@ -67,19 +67,21 @@ void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradien
 
 void main(void) {
 
-  const int maxIter = 512;
+  const int maxIter = 256;
 
   // the ray
+  vec3 rayStartPosition = vPos.xyz;
   vec3 rayOrigin = cameraPosition;
-  vec3 diff = vPos.xyz - rayOrigin;
-  vec3 rayDirection = normalize(diff);
+  vec3 diff = rayStartPosition - rayOrigin;
 
   // Intersection ray/bbox
   float tNear = length(diff);
   float tFar = readDepth();
 
+  vec3 rayDirection = diff / tNear;
+
   // init the ray marching
-  float stepSize = (tFar - tNear) / float(uSteps);
+  // TODO : calculate this as uniform
   vec3 accumulatedColor = vec3(0.0);
   float accumulatedAlpha = 0.0;
   
@@ -88,7 +90,8 @@ void main(void) {
   
   vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
 
-  vec3 rayStartPosition = rayOrigin + rayDirection * tNear;
+  float stepSize = length(dataDim) / float(uSteps);
+
   vec3 currentVoxel = vec3(uWorldToData * vec4(rayStartPosition, 1.0));
 
   vec3 stepVector = mat3(uWorldToData) * (rayDirection * stepSize);
@@ -100,15 +103,18 @@ void main(void) {
     return;
   }
 
-  bool lastStep = false;
+//  gl_FragColor.rgb = vec3((tNear - uCameraNear) / (uCameraFar - uCameraNear));
+//  gl_FragColor.rgb = vec3((tFar - uCameraNear) / (uCameraFar - uCameraNear));
+//  gl_FragColor.a = 1.0;
+//  return;
+
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
-    if (currentZ >= tFar) {
-      lastStep = true;
-      currentVoxel -= stepVector * (currentZ - tFar);
-    }
+//    if (currentZ >= tFar) {
+//      currentVoxel -= stepVector * (currentZ - tFar);
+//    }
     
-    if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
-         all(lessThan(currentVoxel, dataDim))) {
+//    if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
+//         all(lessThan(currentVoxel, dataDim))) {
 
       float intensity = 0.0;
       vec3 gradient = vec3(0.0);
@@ -123,17 +129,19 @@ void main(void) {
       alphaSample *= (1.0 - accumulatedAlpha);
       alphaSample *= alphaScaleFactor;
 
+// TODO : I think this gives better results
 //      accumulatedColor *= accumulatedAlpha;
       
       accumulatedColor += alphaSample * colorSample;
       accumulatedAlpha += alphaSample;
 
-    }
+//    }
 
     currentVoxel += stepVector;
     currentZ += stepSize;
+    
 
-    if (currentZ >= tFar || lastStep || rayStep >= uSteps || accumulatedAlpha >= 0.999 ) {
+    if (currentZ >= tFar || rayStep >= uSteps || accumulatedAlpha >= 0.999 ) {
       break;
     }
   }
