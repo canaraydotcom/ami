@@ -92,7 +92,7 @@ void main(void) {
   
   vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
 
-  float stepSize = 0.2 * length(dataDim) / float(uSteps);
+  float stepSize = 0.1 * length(dataDim) / float(uSteps);
 
   vec3 currentVoxel = vec3(uWorldToData * vec4(rayStartPosition, 1.0));
 
