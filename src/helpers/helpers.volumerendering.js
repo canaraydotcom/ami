@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 import ShadersUniform from '../shaders/shaders.vr.uniform';
 import ShadersVertex from '../shaders/shaders.vr.vertex';
-import ShadersFragment from '../shaders/shaders.vr.fragment';
+import ShadersFragment, {MAX_RAY_STEPS} from '../shaders/shaders.vr.fragment';
 
 import HelpersMaterialMixin from '../helpers/helpers.material.mixin';
 
@@ -104,6 +104,14 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
 
   set uniforms(uniforms) {
     this._uniforms = uniforms;
+  }
+
+  set stepResolution(value) {
+    this._uniforms.uSteps.value = MAX_RAY_STEPS / value;
+
+    // TODO : why is 0.1 a good factor? what is actually dimensionsIJK?
+    this._uniforms.uStepSize.value = 0.1 * this._stack.dimensionsIJK.length() / this._uniforms.uSteps.value;
+    this._uniforms.uAlphaCorrection.value = value;
   }
 
   get stack() {

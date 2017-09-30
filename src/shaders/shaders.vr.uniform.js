@@ -89,6 +89,11 @@ export default class ShadersUniform {
         value: 256,
         typeGLSL: 'int',
       },
+      'uStepSize': {
+        type: 'f',
+        value: 1,
+        typeGLSL: 'float',
+      },
       'uAlphaCorrection': {
         type: 'f',
         value: 1,
