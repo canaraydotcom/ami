@@ -30,8 +30,8 @@ export default class ModelsFrame extends ModelsBase {
     this._pixelData = null;
 
     this._instanceNumber = null;
-    this._windowMin = null;
-    this._windowWidth = null;
+    this._windowMin = 0.0;
+    this._windowWidth = 31000.0;
     this._rescaleSlope = null;
     this._rescaleIntercept = null;
 

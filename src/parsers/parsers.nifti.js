@@ -171,7 +171,7 @@ export default class ParsersNifti extends ParsersVolume {
       ];
 
     } else if (this._dataSet.sform_code > 0) {
-      console.log("TODO : implement sform_code");
+      // TODO : implement sform_code? in our normalized data this data block is hit and it seems to be working just fine.
 
       let sx = this._dataSet.srow_x, sy = this._dataSet.srow_y, sz = this._dataSet.srow_z;
       // fill IJKToRAS

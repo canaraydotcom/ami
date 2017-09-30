@@ -44,6 +44,7 @@ export default class ShadersFragment {
     // need to pre-call main to fill up the functions list
     // language=GLSL
     this._main = `
+
 float readDepth () {
     vec2 coord = vec2(
       (gl_FragCoord.x + uScreenOffsetX) / uScreenWidth, 
@@ -67,7 +68,7 @@ void getIntensity(in vec3 dataCoordinates, out float intensity, out vec3 gradien
 
 void main(void) {
 
-  const int maxIter = 256;
+  const int maxIter = 1024;
 
   // the ray
   vec3 rayStartPosition = vPos.xyz;
@@ -84,13 +85,14 @@ void main(void) {
   // TODO : calculate this as uniform
   vec3 accumulatedColor = vec3(0.0);
   float accumulatedAlpha = 0.0;
+  float nextAlpha = 1.0;
   
   // TODO : calculate from stepSize and voxelSize
-  float alphaScaleFactor = 1.0;
+//  float alphaScaleFactor = 1.0;
   
   vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
 
-  float stepSize = length(dataDim) / float(uSteps);
+  float stepSize = 0.2 * length(dataDim) / float(uSteps);
 
   vec3 currentVoxel = vec3(uWorldToData * vec4(rayStartPosition, 1.0));
 
@@ -108,6 +110,7 @@ void main(void) {
 //  gl_FragColor.a = 1.0;
 //  return;
 
+  int ccc = 0;
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
 //    if (currentZ >= tFar) {
 //      currentVoxel -= stepVector * (currentZ - tFar);
@@ -125,26 +128,32 @@ void main(void) {
       vec3 colorSample = colorFromLUT.rgb;
       float alphaSample = colorFromLUT.a;
 
-   //   alphaSample *= uAlphaCorrection;
-      alphaSample *= (1.0 - accumulatedAlpha);
-      alphaSample *= alphaScaleFactor;
-
-// TODO : I think this gives better results
-//      accumulatedColor *= accumulatedAlpha;
+//      alphaSample *= uAlphaCorrection;
+//      alphaSample *= alphaScaleFactor;
+      float alpha = nextAlpha * alphaSample;
       
-      accumulatedColor += alphaSample * colorSample;
-      accumulatedAlpha += alphaSample;
+      accumulatedColor += alpha * colorSample;
+
+      accumulatedAlpha += alpha;
+      
+      nextAlpha *= (1.0 - alphaSample);
+
 
 //    }
 
     currentVoxel += stepVector;
     currentZ += stepSize;
     
+//    if (accumulatedAlpha > 0.0) {
+//        break;
+//    }
 
-    if (currentZ >= tFar || rayStep >= uSteps || accumulatedAlpha >= 0.999 ) {
+    if (currentZ >= tFar || rayStep >= uSteps || accumulatedAlpha >= 1.0 ) {
       break;
     }
+//    ++ccc;
   }
+//  accumulatedColor.gb *= float(ccc) * 20.0 / float(uSteps);
 
   gl_FragColor = vec4(accumulatedColor, accumulatedAlpha);
 }

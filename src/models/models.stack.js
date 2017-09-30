@@ -210,9 +210,13 @@ export default class ModelsStack extends ModelsBase {
     // set extra vars if nulls
     // happens now because if it happen before, we would think image position/orientation
     // are defined and we would use it to compute spacing.
-    if (!this._frame[0].imagePosition) {
-      this._frame[0].imagePosition = [0, 0, 0];
-    }
+    // if (!this._frame[0].imagePosition) {
+      this._frame[0].imagePosition = [
+        -this._halfDimensionsIJK.x * this._spacing.x,
+        -this._halfDimensionsIJK.y * this._spacing.y,
+        -this._halfDimensionsIJK.z * this._spacing.z
+      ];
+    // }
     if (!this._frame[0].imageOrientation) {
       this._frame[0].imageOrientation = [1, 0, 0, 0, 1, 0];
     }
@@ -230,15 +234,17 @@ export default class ModelsStack extends ModelsBase {
 
     // rescale/slope min max
     this.computeMinMaxIntensities();
-    this.normalizeIntensities();
-    this._minMax[0] = ModelsStack.valueRescaleSlopeIntercept(
-      this._minMax[0],
-      this._rescaleSlope,
-      this._rescaleIntercept);
-    this._minMax[1] = ModelsStack.valueRescaleSlopeIntercept(
-      this._minMax[1],
-      this._rescaleSlope,
-      this._rescaleIntercept);
+    // this.normalizeIntensities();
+
+    // TODO : use slope/intercept?
+    // this._minMax[0] = ModelsStack.valueRescaleSlopeIntercept(
+    //   this._minMax[0],
+    //   this._rescaleSlope,
+    //   this._rescaleIntercept);
+    // this._minMax[1] = ModelsStack.valueRescaleSlopeIntercept(
+    //   this._minMax[1],
+    //   this._rescaleSlope,
+    //   this._rescaleIntercept);
 
     let width = this._minMax[1] - this._minMax[0];
     this._windowWidth = width;
@@ -376,12 +382,13 @@ export default class ModelsStack extends ModelsBase {
   }
 
   computeMinMaxIntensities() {
+    this._minMax = [0, 31000];
     // what about colors!!!!?
-    for (let i = 0; i < this._frame.length; i++) {
-      // get min/max
-      this._minMax[0] = Math.min(this._minMax[0], this._frame[i].minMax[0]);
-      this._minMax[1] = Math.max(this._minMax[1], this._frame[i].minMax[1]);
-    }
+    // for (let i = 0; i < this._frame.length; i++) {
+    //   // get min/max
+    //   this._minMax[0] = Math.min(this._minMax[0], this._frame[i].minMax[0]);
+    //   this._minMax[1] = Math.max(this._minMax[1], this._frame[i].minMax[1]);
+    // }
   }
 
   normalizeIntensities() {
