@@ -31,7 +31,7 @@ export default class ModelsFrame extends ModelsBase {
 
     this._instanceNumber = null;
     this._windowMin = 0.0;
-    this._windowWidth = 31000.0;
+    this._windowWidth = Math.pow(2, 16) - 1;
     this._rescaleSlope = null;
     this._rescaleIntercept = null;
 

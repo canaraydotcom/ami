@@ -29,7 +29,7 @@ export default class ShadersUniform {
       },
       'uWindowMinWidth': {
         type: 'fv1',
-        value: [0.0, 31000.0],
+        value: [0.0, Math.pow(2, 16) - 1],
         typeGLSL: 'float',
         length: 2,
       },

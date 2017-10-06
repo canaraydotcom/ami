@@ -382,7 +382,7 @@ export default class ModelsStack extends ModelsBase {
   }
 
   computeMinMaxIntensities() {
-    this._minMax = [0, 31000];
+    this._minMax = [0, Math.pow(2, 16) - 1];
     // what about colors!!!!?
     // for (let i = 0; i < this._frame.length; i++) {
     //   // get min/max
