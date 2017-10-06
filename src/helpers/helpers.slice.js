@@ -92,6 +92,8 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
     inv.getInverse(this._volumeTransform);
     this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
     this._uniforms.uWorldToData.value.multiply(inv);
+
+    this._update();
   }
 
   get stack() {
