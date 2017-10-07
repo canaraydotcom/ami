@@ -116,6 +116,10 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._uniforms = uniforms;
   }
 
+  get stepResolution() {
+    return this._uniforms.uAlphaCorrection.value;
+  }
+
   set stepResolution(value) {
 
     let stepSize = this._stack.spacing.x * value;
