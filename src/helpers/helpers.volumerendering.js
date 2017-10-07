@@ -6,6 +6,13 @@ import ShadersFragment, {MAX_RAY_STEPS} from '../shaders/shaders.vr.fragment';
 
 import HelpersMaterialMixin from '../helpers/helpers.material.mixin';
 
+const CORRECTION_COEFS = [
+  [ 1,  0,  0,  0],
+  [ 2,  1,  0,  0].map(c => c * 0.8),
+  [ 3,  3,  1,  0].map(c => c * 0.85),
+  [ 4,  6,  4,  1].map(c => c * 0.9),
+  [ 5, 10, 10,  5],
+];
 
 /**
  * @module helpers/volumerendering
@@ -23,6 +30,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._uniforms = ShadersUniform.uniforms();
     this._material = null;
     this._geometry = null;
+    this._diagonalLength = 0;
 
     this._interpolation = 1; // default to trilinear interpolation
 
@@ -90,12 +98,14 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     let worldBBox = this._stack.worldBoundingBox();
     let centerLPS = this._stack.worldCenter();
 
-    this._geometry = new THREE.BoxGeometry(
-      worldBBox[1] - worldBBox[0],
-      worldBBox[3] - worldBBox[2],
-      worldBBox[5] - worldBBox[4]);
+    let width = worldBBox[1] - worldBBox[0];
+    let height = worldBBox[3] - worldBBox[2];
+    let depth = worldBBox[5] - worldBBox[4];
+    this._geometry = new THREE.BoxGeometry(width, height, depth);
     this._geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
       centerLPS.x, centerLPS.y, centerLPS.z));
+
+    this._diagonalLength = new THREE.Vector3(width, height, depth).length();
   }
 
   get uniforms() {
@@ -107,11 +117,16 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
   }
 
   set stepResolution(value) {
-    this._uniforms.uSteps.value = MAX_RAY_STEPS / value;
 
-    // TODO : why is 0.1 a good factor? what is actually dimensionsIJK?
-    this._uniforms.uStepSize.value = 0.1 * this._stack.dimensionsIJK.length() / this._uniforms.uSteps.value;
+    let stepSize = this._stack.spacing.x * value;
+    this._uniforms.uStepSize.value = stepSize;
+
+    this._uniforms.uSteps.value = this._diagonalLength / stepSize;
+
+    // TODO : we're assuming here that the spacing is equal in all dimensions
     this._uniforms.uAlphaCorrection.value = value;
+
+    this._uniforms.uCorrectionCoefs.value = CORRECTION_COEFS[Math.min(value, CORRECTION_COEFS.length) - 1];
   }
 
   get stack() {

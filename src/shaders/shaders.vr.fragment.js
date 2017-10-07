@@ -100,7 +100,7 @@ void main(void) {
     gl_FragColor.a = 0.0;
     return;
   }
-
+  
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
 //    if (currentZ >= tFar) {
 //      currentVoxel -= stepVector * (currentZ - tFar);
@@ -117,9 +117,16 @@ void main(void) {
 
     vec3 colorSample = colorFromLUT.rgb;
     float alphaSample = colorFromLUT.a;
+    // TODO : make the alpha LUT quadratic instead.
+    alphaSample *= alphaSample;
 
-    float alpha = nextAlpha * alphaSample;
-    
+    // TODO : use the last sampled value with linear interpolation to get less jagged results?
+    float alpha = nextAlpha * alphaSample * 
+        (uCorrectionCoefs[0] - 
+         (uCorrectionCoefs[1] - 
+          (uCorrectionCoefs[2] + uCorrectionCoefs[3] * alphaSample) * alphaSample) * alphaSample);
+     
+   
     accumulatedColor += alpha * colorSample;
 
     accumulatedAlpha += alpha;

@@ -95,9 +95,14 @@ export default class ShadersUniform {
         typeGLSL: 'float',
       },
       'uAlphaCorrection': {
-        type: 'f',
+        type: 'i',
         value: 1,
-        typeGLSL: 'float',
+        typeGLSL: 'int',
+      },
+      'uCorrectionCoefs': {
+        type: 'v4',
+        value: [1.0, 0.0, 0.0, 0.0],
+        typeGLSL: 'vec4',
       },
       'uScreenWidth': {
         type: 'f',
@@ -115,17 +120,6 @@ export default class ShadersUniform {
         typeGLSL: 'float',
       },
       'uScreenOffsetY': {
-        type: 'f',
-        value: 0.0,
-        typeGLSL: 'float',
-      },
-      // TODO : is this used anywhere??
-      'uFrequence': {
-        type: 'f',
-        value: 0.0,
-        typeGLSL: 'float',
-      },
-      'uAmplitude': {
         type: 'f',
         value: 0.0,
         typeGLSL: 'float',

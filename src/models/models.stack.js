@@ -819,6 +819,10 @@ return a.sopInstanceUID - b.sopInstanceUID;
     return this._lps2AABB;
   }
 
+  get spacing() {
+    return this._spacing;
+  }
+
   set textureSize(textureSize) {
     this._textureSize = textureSize;
   }
