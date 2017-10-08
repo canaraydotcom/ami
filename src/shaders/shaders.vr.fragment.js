@@ -124,7 +124,8 @@ void main(void) {
     float alpha = nextAlpha * alphaSample * 
         (uCorrectionCoefs[0] - 
          (uCorrectionCoefs[1] - 
-          (uCorrectionCoefs[2] + uCorrectionCoefs[3] * alphaSample) * alphaSample) * alphaSample);
+          (uCorrectionCoefs[2] - 
+           uCorrectionCoefs[3] * alphaSample) * alphaSample) * alphaSample);
      
    
     accumulatedColor += alpha * colorSample;

@@ -8,9 +8,9 @@ import HelpersMaterialMixin from '../helpers/helpers.material.mixin';
 
 const CORRECTION_COEFS = [
   [ 1,  0,  0,  0],
-  [ 2,  1,  0,  0].map(c => c * 0.8),
-  [ 3,  3,  1,  0].map(c => c * 0.85),
-  [ 4,  6,  4,  1].map(c => c * 0.9),
+  [ 2,  1,  0,  0],
+  [ 3,  3,  1,  0],
+  [ 4,  6,  4,  1],
   [ 5, 10, 10,  5],
 ];
 
