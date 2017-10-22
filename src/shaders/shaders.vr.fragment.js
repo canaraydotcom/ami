@@ -102,39 +102,36 @@ void main(void) {
   }
   
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
-//    if (currentZ >= tFar) {
-//      currentVoxel -= stepVector * (currentZ - tFar);
-//    }
     
-//    if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
-//         all(lessThan(currentVoxel, dataDim))) {
+    if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
+         all(lessThan(currentVoxel, dataDim))) {
 
-    float intensity = 0.0;
-    vec3 gradient = vec3(0.0);
-    getIntensity(currentVoxel, intensity, gradient);
+      float intensity = 0.0;
+      vec3 gradient = vec3(0.0);
+      getIntensity(currentVoxel, intensity, gradient);
+       
+      vec4 colorFromLUT = texture2D( uTextureLUT, vec2( intensity, 0.5) );
 
-    vec4 colorFromLUT = texture2D( uTextureLUT, vec2( intensity, 0.5) );
-
-    vec3 colorSample = colorFromLUT.rgb;
-    float alphaSample = colorFromLUT.a;
-    // TODO : make the alpha LUT quadratic instead.
-    alphaSample *= alphaSample;
-
-    // TODO : use the last sampled value with linear interpolation to get less jagged results?
-    float alpha = nextAlpha * alphaSample * 
-        (uCorrectionCoefs[0] - 
-         (uCorrectionCoefs[1] - 
-          (uCorrectionCoefs[2] - 
-           uCorrectionCoefs[3] * alphaSample) * alphaSample) * alphaSample);
+      vec3 colorSample = colorFromLUT.rgb;
+      float alphaSample = colorFromLUT.a;
+      // TODO : make the alpha LUT quadratic instead.
+      alphaSample *= alphaSample;
+  
+      // TODO : use the last sampled value with linear interpolation to get less jagged results?
+      float alpha = nextAlpha * alphaSample * 
+          (uCorrectionCoefs[0] - 
+           (uCorrectionCoefs[1] - 
+            (uCorrectionCoefs[2] - 
+             uCorrectionCoefs[3] * alphaSample) * alphaSample) * alphaSample);
+       
      
-   
-    accumulatedColor += alpha * colorSample;
+      accumulatedColor += alpha * colorSample;
+  
+      accumulatedAlpha += alpha;
+      
+      nextAlpha *= (1.0 - alphaSample);
 
-    accumulatedAlpha += alpha;
-    
-    nextAlpha *= (1.0 - alphaSample);
-
-//    }
+    }
 
     currentVoxel += stepVector;
     currentZ += uStepSize;
