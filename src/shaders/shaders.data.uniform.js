@@ -98,26 +98,16 @@ export default class ShadersUniform {
         value: 0.,
         typeGLSL: 'float',
       },
-      // 'uBorderColor': {
-      //   type: 'v3',
-      //   value: [1.0, 0.0, 0.5],
-      //   typeGLSL: 'vec3',
-      // },
-      // 'uBorderWidth': {
-      //   type: 'f',
-      //   value: 2.,
-      //   typeGLSL: 'float',
-      // },
-      // 'uBorderMargin': {
-      //   type: 'f',
-      //   value: 2.,
-      //   typeGLSL: 'float',
-      // },
-      // 'uBorderDashLength': {
-      //   type: 'f',
-      //   value: 10.,
-      //   typeGLSL: 'float',
-      // },
+			'uSteps': {
+				type: 'i',
+				value: 256,
+				typeGLSL: 'int',
+			},
+			'uStepSize': {
+				type: 'f',
+				value: 1,
+				typeGLSL: 'float',
+			},
     };
   }
 }

@@ -1,5 +1,7 @@
 import shadersInterpolation from './interpolation/shaders.interpolation';
 
+export const MAX_STEP_COUNT = 512;
+
 export default class ShadersFragment {
 
   // pass uniforms object
@@ -43,20 +45,21 @@ export default class ShadersFragment {
     // need to pre-call main to fill up the functions list
     // language=GLSL
     this._main = `
-const int MAX_STEP_COUNT = 10;
+const int MAX_STEP_COUNT = ${MAX_STEP_COUNT};
 
-const float stepWeight = 1.0 / float(MAX_STEP_COUNT);
 
 void main(void) {
+  float stepWeight = 1.0 / float(uSteps);
+  
   // TODO : do this in the vertex shader or compute it as uniforms?
-  float stepSize = uSliceThickness / float(MAX_STEP_COUNT);
-  vec3 step = uSliceNormal * stepSize;
+  // float stepSize = uSliceThickness / float(MAX_STEP_COUNT);
+  vec3 step = uSliceNormal * uStepSize;
 
   // get texture coordinates of current pixel
   // TODO : this should be possible in the vertex shader
-  vec4 dataCoordinates = uWorldToData * vPos;
-  
+  vec4 dataCoordinates = uWorldToData * vPos;  
   vec3 currentVoxel = dataCoordinates.xyz - uSliceNormal * uSliceThickness * 0.5;
+  
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
   float intensity = 0.0;
@@ -64,6 +67,10 @@ void main(void) {
     ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
     intensity += dataValue.r;
     currentVoxel += step;
+    
+    if (i >= uSteps) {
+      break;
+    }
   }
   
   intensity *= stepWeight;

@@ -3,7 +3,7 @@ import * as THREE from "three";
 import GeometriesSlice from '../geometries/geometries.slice';
 import ShadersUniform from '../shaders/shaders.data.uniform';
 import ShadersVertex from '../shaders/shaders.data.vertex';
-import ShadersFragment from '../shaders/shaders.data.fragment';
+import ShadersFragment, {MAX_STEP_COUNT} from '../shaders/shaders.data.fragment';
 
 import HelpersMaterialMixin from '../helpers/helpers.material.mixin';
 
@@ -60,6 +60,7 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
     this._geometry = null;
     this._mesh = null;
     this._visible = true;
+    this._stepResolution = 1;
 
     this._volumeTransform = new THREE.Matrix4();
 
@@ -110,9 +111,28 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
 
   set thickness(value) {
     this._uniforms.uSliceThickness.value = value;
+		this.updateStepUniforms();
   }
 
-  get windowWidth() {
+	set stepResolution(value) {
+  	this._stepResolution = value;
+		this.updateStepUniforms();
+	}
+
+	updateStepUniforms() {
+		let stepSize = this._stack.spacing.x * this.stepResolution;
+		let stepCount = Math.floor(Math.ceil(this.thickness / stepSize) / 2) * 2 + 1;
+		stepCount = Math.min(stepCount, MAX_STEP_COUNT);
+
+		this._uniforms.uSteps.value = stepCount;
+		this._uniforms.uStepSize.value = this.thickness / stepCount;
+	}
+
+	get stepResolution() {
+  	return this._stepResolution;
+	}
+
+	get windowWidth() {
     return this._windowWidth;
   }
 
