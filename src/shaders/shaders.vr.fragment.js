@@ -101,10 +101,14 @@ void main(void) {
     return;
   }
   
+  bool wasInside = false;
+  
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
     
     if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
          all(lessThan(currentVoxel, dataDim))) {
+
+      wasInside = true;
 
       float intensity = 0.0;
       vec3 gradient = vec3(0.0);
@@ -131,6 +135,8 @@ void main(void) {
       
       nextAlpha *= (1.0 - alphaSample);
 
+    } else if (wasInside) {
+      break;
     }
 
     currentVoxel += stepVector;

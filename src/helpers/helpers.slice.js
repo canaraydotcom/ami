@@ -378,6 +378,7 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
 
       this._createMaterial({
         side: THREE.DoubleSide,
+				transparent: true,
       });
     }
 
