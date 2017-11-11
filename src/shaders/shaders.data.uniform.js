@@ -103,10 +103,10 @@ export default class ShadersUniform {
 				value: 256,
 				typeGLSL: 'int',
 			},
-			'uStepSize': {
-				type: 'f',
-				value: 1,
-				typeGLSL: 'float',
+			'uStep': {
+				type: 'v3',
+				value: [1, 0, 0],
+				typeGLSL: 'vec3',
 			},
     };
   }

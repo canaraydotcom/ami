@@ -125,7 +125,7 @@ export default class HelpersSlice extends HelpersMaterialMixin(THREE.Object3D) {
 		stepCount = Math.min(stepCount, MAX_STEP_COUNT);
 
 		this._uniforms.uSteps.value = stepCount;
-		this._uniforms.uStepSize.value = this.thickness / stepCount;
+		this._uniforms.uStep.value = this.planeDirection.clone().multiplyScalar(this.thickness / stepCount);
 	}
 
 	get stepResolution() {
