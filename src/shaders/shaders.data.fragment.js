@@ -49,7 +49,6 @@ const int MAX_STEP_COUNT = ${MAX_STEP_COUNT};
 varying vec3 vStartVoxel;
 
 void main(void) {
-  float stepWeight = 1.0 / float(uSteps);
   
   // get texture coordinates of current pixel
   vec3 currentVoxel = vStartVoxel;
@@ -57,7 +56,7 @@ void main(void) {
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
   float intensity = 0.0;
-  for (int i = 0; i < MAX_STEP_COUNT; ++i) {
+  for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
     ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
     intensity += dataValue.r;
     currentVoxel += uStep;
@@ -67,13 +66,14 @@ void main(void) {
     }
   }
   
-  intensity *= stepWeight;
+  intensity /= float(uSteps);
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
   intensity = clamp(intensity, 0.0, 1.0);
 
   // Apply LUT table...
   // should opacity be grabbed there?
+
   dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
   dataValue.a = dot(dataValue.rgb, vec3(0.299, 0.587, 0.114));

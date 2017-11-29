@@ -383,7 +383,8 @@ export default class ModelsStack extends ModelsBase {
 
   computeMinMaxIntensities() {
     this._minMax = [0, Math.pow(2, 16) - 1];
-    // what about colors!!!!?
+
+    // // what about colors!!!!?
     // for (let i = 0; i < this._frame.length; i++) {
     //   // get min/max
     //   this._minMax[0] = Math.min(this._minMax[0], this._frame[i].minMax[0]);
@@ -523,6 +524,8 @@ export default class ModelsStack extends ModelsBase {
         packIndex++;
         coordinate = Math.floor(packIndex / 2);
         channelOffset = packIndex % 2;
+
+        // TODO : this can be optimized. also put this into a worker?
       }
 
       packed.textureType = THREE.RGBAFormat;
