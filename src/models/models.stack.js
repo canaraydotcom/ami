@@ -4,7 +4,7 @@ import * as THREE from "three";
 import CoreColors from '../core/core.colors';
 import CoreUtils from '../core/core.utils';
 import ModelsBase from '../models/models.base';
-import ModelsFrame from "./models.frame";
+import ModelsFrame from './models.frame';
 
 let binaryString = require('math-float32-to-binary-string');
 
