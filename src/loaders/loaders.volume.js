@@ -6,9 +6,9 @@ import LoadersBase from './loaders.base';
 import ModelsSeries from '../models/models.series';
 import ModelsStack from '../models/models.stack';
 import ModelsFrame from '../models/models.frame';
-import ParsersDicom from '../parsers/parsers.dicom';
+// import ParsersDicom from '../parsers/parsers.dicom';
 import ParsersNifti from '../parsers/parsers.nifti';
-import ParsersNrrd from '../parsers/parsers.nrrd';
+// import ParsersNrrd from '../parsers/parsers.nrrd';
 
 
 /**
@@ -58,7 +58,7 @@ export default class LoadersVolumes extends LoadersBase {
 
     return new Promise(
       (resolve, reject) => {
-        window.setTimeout(
+        setTimeout(
           () => {
             resolve(new Promise((resolve, reject) => {
               let data = response;
@@ -112,7 +112,7 @@ export default class LoadersVolumes extends LoadersBase {
               try {
                 volumeParser = new Parser(data, 0);
               } catch (e) {
-                window.console.log(e);
+                console.log(e);
                 reject(e);
               }
 
@@ -247,17 +247,17 @@ export default class LoadersVolumes extends LoadersBase {
       case 'NII_':
         Parser = ParsersNifti;
         break;
-      case 'DCM':
-      case 'DICOM':
-      case 'IMA':
-      case '':
-        Parser = ParsersDicom;
-        break;
-      case 'NRRD':
-        Parser = ParsersNrrd;
-        break;
+      // case 'DCM':
+      // case 'DICOM':
+      // case 'IMA':
+      // case '':
+      //   Parser = ParsersDicom;
+      //   break;
+      // case 'NRRD':
+      //   Parser = ParsersNrrd;
+      //   break;
       default:
-        window.console.log('unsupported extension: ' + extension);
+        console.log('unsupported extension: ' + extension);
         return false;
     }
     return Parser;

@@ -4,6 +4,7 @@ import * as THREE from "three";
 import CoreColors from '../core/core.colors';
 import CoreUtils from '../core/core.utils';
 import ModelsBase from '../models/models.base';
+import ModelsFrame from "./models.frame";
 
 let binaryString = require('math-float32-to-binary-string');
 
@@ -525,7 +526,7 @@ export default class ModelsStack extends ModelsBase {
         coordinate = Math.floor(packIndex / 2);
         channelOffset = packIndex % 2;
 
-        // TODO : this can be optimized. also put this into a worker?
+        // TODO : this can be optimized.
       }
 
       packed.textureType = THREE.RGBAFormat;
@@ -1008,5 +1009,23 @@ return a.sopInstanceUID - b.sopInstanceUID;
 
   get segmentationLUTO() {
     return this._segmentationLUTO;
+  }
+
+  copy(otherStack) {
+		for (const key in this) {
+			if (key === '_frame') {
+			  this._frame = [];
+			  for (const otherFrame of otherStack._frame) {
+			    const frame = new ModelsFrame();
+			    frame.copy(otherFrame);
+			    this._frame.push(frame);
+        }
+      } else if (typeof(this[key]) !== 'function') {
+				// noinspection JSUnfilteredForInLoop
+				this[key] = otherStack[key];
+			}
+		}
+
+		return this;
   }
 }

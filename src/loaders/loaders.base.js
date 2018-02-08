@@ -34,7 +34,7 @@ export default class LoadersBase {
    * @param {dom} container - The dom container of loader.
    * @param {object} ProgressBar - The progressbar of loader.
    */
-  constructor(container = null, ProgressBar = HelpersProgressBar) {
+  constructor(ProgressBar = HelpersProgressBar) {
     this._loaded = -1;
     this._totalLoaded = -1;
     this._parsed = -1;
@@ -42,10 +42,9 @@ export default class LoadersBase {
 
     this._data = [];
 
-    this._container = container;
     this._progressBar = null;
-    if (this._container && ProgressBar) {
-      this._progressBar = new ProgressBar(this._container);
+    if (ProgressBar) {
+      this._progressBar = new ProgressBar();
     }
   }
 
@@ -53,7 +52,6 @@ export default class LoadersBase {
    * free the reference.
    */
   free() {
-    this._container = null;
     this._helpersProgressBar = null;
 
     if (this._progressBar) {
@@ -137,8 +135,8 @@ export default class LoadersBase {
         return data;
       })
       .catch(function(error) {
-        window.console.log('oops... something went wrong...');
-        window.console.log(error);
+        console.log('oops... something went wrong...');
+        console.log(error);
       });
   }
 

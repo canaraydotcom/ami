@@ -383,4 +383,14 @@ export default class ModelsFrame extends ModelsBase {
   set index(index) {
     this._index = index;
   }
+
+  copy(otherFrame) {
+    for (const key in this) {
+			if (typeof(this[key]) !== 'function') {
+				// noinspection JSUnfilteredForInLoop
+				this[key] = otherFrame[key];
+			}
+    }
+    return this;
+  }
 }
