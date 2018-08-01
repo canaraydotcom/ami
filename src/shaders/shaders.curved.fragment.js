@@ -1,4 +1,5 @@
 import shadersInterpolation from './interpolation/shaders.interpolation';
+import {MAX_STEP_COUNT} from "./shaders.data.fragment";
 
 export const CURVE_SEGMENTS = 2048;
 
@@ -59,9 +60,11 @@ export default class ShadersFragment {
     // need to pre-call main to fill up the functions list
     // language=GLSL
     this._main = `
+const int MAX_STEP_COUNT = ${MAX_STEP_COUNT};
+
 vec4 getWorldCoordinates() {
   vec2 xy = texture2D(uCurveCoordinates, vec2(vUv.x, 0.5)).xy;
-  return vec4(xy, vPos.z, 1.0);
+  return vec4(xy, vPos.y, 1.0);
 }
     
 void main(void) {
@@ -70,9 +73,22 @@ void main(void) {
   vec3 currentVoxel = dataCoordinates.xyz;
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
-  ${shadersInterpolation( this, 'currentVoxel', 'dataValue', 'gradient' )}
-
-  float intensity = dataValue.r;
+  
+  // TODO : calculate normal
+  vec3 step = vec3(0.0); 
+  
+  float intensity = 0.0;
+  for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
+  	${shadersInterpolation( this, 'currentVoxel', 'dataValue', 'gradient' )}
+   	intensity += dataValue.r;
+    currentVoxel += step;
+    
+    if (i >= uSteps) {
+      break;
+    }
+  }
+  
+  intensity /= float(uSteps);
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
   intensity = clamp(intensity, 0.0, 1.0);
@@ -81,8 +97,11 @@ void main(void) {
   // should opacity be grabbed there?
   dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
+  dataValue.a = dot(dataValue.rgb, vec3(0.299, 0.587, 0.114));
+  dataValue.rgb /= dataValue.a;
+
   if(uInvert == 1){
-    dataValue = vec4(1.) - dataValue;
+    dataValue = vec4(1.0) - dataValue;
     // how do we deal with that and opacity?
     dataValue.a = 1.0;
   }
@@ -100,6 +119,7 @@ void main(void) {
     // shaderInterpolation.inline(args) //true/false
     // shaderInterpolation.functions(args)
     
+    // language=GLSL
     return `
 // uniforms
 ${this.uniforms()}

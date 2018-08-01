@@ -101,7 +101,7 @@ export default class Intersections {
 
     if(!(this.validateAabb(aabb) &&
        this.validatePlane(plane))) {
-      window.console.log('Invalid aabb or plane provided.');
+
       return false;
     }
 

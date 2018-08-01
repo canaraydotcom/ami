@@ -55,6 +55,7 @@ void main(void) {
   
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
+  
   float intensity = 0.0;
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
     ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
