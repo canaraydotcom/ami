@@ -60,6 +60,7 @@ export default class ShadersFragment {
     // need to pre-call main to fill up the functions list
     // language=GLSL
     this._main = `
+// TODO : this is almost the same as data.fragment
 const int MAX_STEP_COUNT = ${MAX_STEP_COUNT};
 
 vec4 getWorldCoordinates() {
@@ -107,6 +108,7 @@ void main(void) {
   }
 
   gl_FragColor = dataValue;
+//  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 
 }
    `;
