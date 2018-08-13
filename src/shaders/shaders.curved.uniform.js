@@ -19,6 +19,16 @@ export default class ShadersUniform {
         value: 1.0,
         typeGLSL: 'float'
       },
+      'uCurveUpVectors': {
+        type: 't',
+        value: [],
+        typeGLSL: 'sampler2D',
+      },
+      'uCurveTangentVectors': {
+				type: 't',
+				value: [],
+				typeGLSL: 'sampler2D',
+      }
     };
     delete us.uStep;
 
