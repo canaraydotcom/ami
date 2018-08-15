@@ -102,18 +102,23 @@ vec3 rotate_vertex_position(vec3 position, vec3 axis, float angle)
 
 
 vec4 getWorldCoordinates() {
+
+  float angle;
+  for (int i = 1; i < ${this._uniforms.uCurveTangentUpAngles.length}; ++i) {
+    if (uCurveTangentUpAngles[i].x >= vUv.x) {
+      angle = mix(uCurveTangentUpAngles[i - 1].y, uCurveTangentUpAngles[i].y, 
+        (vUv.x - uCurveTangentUpAngles[i - 1].x) / (uCurveTangentUpAngles[i].x - uCurveTangentUpAngles[i - 1].x));
+      break;
+    }
+  }
+  
   vec2 texturePos = vec2(vUv.x, 0.5);
   vec3 curvePos = texture2D(uCurveCoordinates, texturePos).xyz;
-  vec4 up = texture2D(uCurveUpVectors, texturePos);
-  vec3 tangentUp = vec3(up.xy, 0.0);
   vec3 tangent = texture2D(uCurveTangentVectors, texturePos).xyz;
+    
+  vec3 tangentUp = rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
   
-  float angle = acos(-tangent.z);   // dot(tangent, vec3(0, 0, -1)) == -tangent.z
-  vec3 axis = cross(tangent, vec3(0.0, 0.0, 1.0));
-  
-  tangentUp = rotate_vertex_position(tangentUp, axis, angle);
-  
-  return vec4(curvePos + (vPos.y - curvePos.z) * tangentUp, 1.0);
+  return vec4(curvePos + (vPos.y - 0.5) * tangentUp, 1.0);
 }
     
 void main(void) {

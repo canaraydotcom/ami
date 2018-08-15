@@ -27,24 +27,24 @@ export default class HelpersCurved extends HelpersSliceBase {
 		this._uniforms = ShadersUniform.uniforms();
 
 		this._curve = curve;
-		this._tangentUpVectors = [
+		this._tangentUpAngles = [
 			{
 				curvePosition: 0,
-				vector: new THREE.Vector2(0, 1),
+				angle: 0,
 			},
 			{
 				curvePosition: 1,
-				vector: new THREE.Vector2(0, 1),
+				angle: 0,
 			},
 		];
-		this._normalUpVectors = [
+		this._normalUpAngles = [
 			{
 				curvePosition: 0,
-				vector: new THREE.Vector2(0, 1),
+				angle: 0,
 			},
 			{
 				curvePosition: 1,
-				vector: new THREE.Vector2(0, 1),
+				angle: 0,
 			},
 		];
 
@@ -68,20 +68,28 @@ export default class HelpersCurved extends HelpersSliceBase {
 		this._update();
 	}
 
-	get tangentUpVectors() {
-		return this._tangentUpVectors;
+	get tangentUpAngles() {
+		return this._tangentUpAngles;
 	}
 
-	set tangentUpVectors(value) {
-		this._tangentUpVectors = value;
+	set tangentUpAngles(value) {
+		this._tangentUpAngles = value;
 	}
 
-	get normalUpVectors() {
-		return this._normalUpVectors;
+	get normalUpAngles() {
+		return this._normalUpAngles;
 	}
 
-	set normalUpVectors(value) {
-		this._normalUpVectors = value;
+	set normalUpAngles(value) {
+		this._normalUpAngles = value;
+	}
+
+	get curvePlaneNormal() {
+		return this._uniforms.uCurvePlaneNormal.value;
+	}
+
+	set curvePlaneNormal(value) {
+		this._uniforms.uCurvePlaneNormal.value = value;
 	}
 
 	// private methods
@@ -127,60 +135,12 @@ export default class HelpersCurved extends HelpersSliceBase {
 	}
 
 	updateUpUniforms() {
-		const upData = new Float32Array(UP_RESOLUTION * 4);
+		const upData = this._uniforms.uCurveTangentUpAngles.value;
 
-		let curTangentIndex = 1;
-		let curTangentPos = this._tangentUpVectors[1].splinePosition;
-		let curTangentDiff = curTangentPos - this._tangentUpVectors[0].splinePosition;
-		let curTangentVec = this._tangentUpVectors[1].vector;
-		let prevTangentVec = this._tangentUpVectors[0].vector;
-
-		let curNormalIndex = 1;
-		let curNormalPos = this._normalUpVectors[1].splinePosition;
-		let curNormalDiff = curNormalPos - this._normalUpVectors[0].splinePosition;
-		let curNormalVec = this._normalUpVectors[1].vector;
-		let prevNormalVec = this._normalUpVectors[0].vector;
-
-		for (let i = 0; i < UP_RESOLUTION; ++i) {
-			const curvePos = i / (UP_RESOLUTION - 1);
-
-			if (curvePos > curTangentPos) {
-				curTangentIndex += 1;
-				const prevTangentPos = curTangentPos;
-				prevTangentVec = curTangentVec;
-				curTangentPos = this._tangentUpVectors[curTangentIndex].splinePosition;
-				curTangentVec = this._tangentUpVectors[curTangentIndex].vector;
-				curTangentDiff = curTangentPos - prevTangentPos;
-			}
-
-			let w = (curTangentPos - curvePos) / curTangentDiff;
-			const tangentUp = prevTangentVec.clone().multiplyScalar(w).add(curTangentVec.clone().multiplyScalar(1 - w));
-
-			upData[i * 4] = tangentUp.x;
-			upData[i * 4 + 1] = tangentUp.y;
-
-			if (curvePos > curNormalPos) {
-				curNormalIndex += 1;
-				const prevNormalPos = curNormalPos;
-				prevNormalVec = curNormalVec;
-				curNormalPos = this._normalUpVectors[curNormalIndex].splinePosition;
-				curNormalVec = this._normalUpVectors[curNormalIndex].vector;
-				curNormalDiff = curNormalPos - prevNormalPos;
-			}
-
-			w = (curNormalPos - curvePos) / curNormalDiff;
-			const normalUp = prevNormalVec.clone().multiplyScalar(w).add(curNormalVec.clone().multiplyScalar(1 - w));
-
-			upData[i * 4 + 2] = normalUp.x;
-			upData[i * 4 + 3] = normalUp.y;
+		for (const [i, {splinePosition, angle}] of this._tangentUpAngles.entries()) {
+			upData[i] = new THREE.Vector2(splinePosition, angle);
 		}
 
-		const curveUpTex = new THREE.DataTexture(upData, UP_RESOLUTION, 1, THREE.RGBAFormat, THREE.FloatType);
-		curveUpTex.generateMipmaps = false;
-		curveUpTex.minFilter = THREE.LinearFilter;
-		curveUpTex.maxFilter = THREE.LinearFilter;
-		curveUpTex.needsUpdate = true;
-		this._uniforms.uCurveUpVectors.value = curveUpTex;
-
+		this._uniforms.uCurveTangentUpAngles.value = upData;
 	}
 }

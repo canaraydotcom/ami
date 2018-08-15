@@ -19,15 +19,30 @@ export default class ShadersUniform {
         value: 1.0,
         typeGLSL: 'float'
       },
-      'uCurveUpVectors': {
-        type: 't',
-        value: [],
-        typeGLSL: 'sampler2D',
+      'uCurveTangentUpAngles': {
+        type: 'v2v',
+        value: [
+          new THREE.Vector2(0, 0),
+          new THREE.Vector2(1, 0),
+					new THREE.Vector2(1, 0),
+					new THREE.Vector2(1, 0),
+					new THREE.Vector2(1, 0),
+					new THREE.Vector2(1, 0),
+					new THREE.Vector2(1, 0),
+					new THREE.Vector2(1, 0),
+        ],
+        length: 8,
+        typeGLSL: 'vec2',
       },
       'uCurveTangentVectors': {
 				type: 't',
 				value: [],
 				typeGLSL: 'sampler2D',
+      },
+      'uCurvePlaneNormal': {
+        type: 'v3',
+        value: new THREE.Vector3(0, 0, 1),
+        typeGLSL: 'vec3',
       }
     };
     delete us.uStep;
