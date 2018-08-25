@@ -19,6 +19,8 @@ let HerlpersMaterialMixin = (superclass) => class extends superclass {
       uniforms: this._uniforms,
       vertexShader: vs.compute(),
       fragmentShader: fs.compute(),
+      // wireframe: true,
+      // side: THREE.DoubleSide,
     };
 
     let options = Object.assign(extraOptions, globalOptions);

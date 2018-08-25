@@ -115,10 +115,12 @@ vec4 getWorldCoordinates() {
   vec2 texturePos = vec2(vUv.x, 0.5);
   vec3 curvePos = texture2D(uCurveCoordinates, texturePos).xyz;
   vec3 tangent = texture2D(uCurveTangentVectors, texturePos).xyz;
+  vec3 normal = cross(tangent, uCurvePlaneNormal);
     
   vec3 tangentUp = rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
+  vec3 up = vPos.y * tangentUp;
   
-  return vec4(curvePos + (vPos.y - 0.5) * tangentUp, 1.0);
+  return vec4(curvePos + up, 1.0);
 }
     
 void main(void) {
