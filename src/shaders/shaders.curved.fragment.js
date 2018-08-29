@@ -101,7 +101,7 @@ vec3 rotate_vertex_position(vec3 position, vec3 axis, float angle)
 }
 
 
-vec4 getWorldCoordinates() {
+vec4 getWorldCoordinates(out vec3 normal) {
 
   float angle;
   for (int i = 1; i < ${this._uniforms.uCurveTangentUpAngles.length}; ++i) {
@@ -115,7 +115,11 @@ vec4 getWorldCoordinates() {
   vec2 texturePos = vec2(vUv.x, 0.5);
   vec3 curvePos = texture2D(uCurveCoordinates, texturePos).xyz;
   vec3 tangent = texture2D(uCurveTangentVectors, texturePos).xyz;
-  vec3 normal = cross(tangent, uCurvePlaneNormal);
+  
+  // TODO : use same quaternion for normal and up rotations
+  
+  normal = cross(tangent, uCurvePlaneNormal);
+  normal = rotate_vertex_position(normal, tangent, angle);
     
   vec3 tangentUp = rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
   vec3 up = vPos.y * tangentUp;
@@ -125,13 +129,14 @@ vec4 getWorldCoordinates() {
     
 void main(void) {
 
-  vec4 dataCoordinates = uWorldToData * getWorldCoordinates();
+  vec3 normal;
+  vec4 dataCoordinates = uWorldToData * getWorldCoordinates(normal);
   vec3 currentVoxel = dataCoordinates.xyz;
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
   
   // TODO : calculate normal
-  vec3 step = vec3(0.0); 
+  vec3 step = normal * uSliceThickness / float(uSteps);
   
   float intensity = 0.0;
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {

@@ -100,117 +100,131 @@ export default class HelpersCurved extends HelpersSliceBase {
 	}
 
 	_createGeometry(toAABB) {
+
+		// TODO : subdivision algorithm?
+
+		const horizontalStepSize = 0.1;
+		const curveLength = this._curve.getLength();
+		const horizontalStepCount = Math.floor(curveLength / horizontalStepSize);
+
+		const horizontalSegmentStepCount = 20;
+
+		const verticalStepCount = 15;
+
 		const height = this._halfDimensions.z * 2;
 
 		const geom = new THREE.BufferGeometry();
 
-		const bottomLengths = [];
-		const topLengths = [];
+		const segmentLengths = [];
 
-		let totalBottomLength = 0;
-		let totalTopLength = 0;
+		const totalLengths = [];
 
-		let up = this._tangentUpAngles[0];
+		let p = this._curve.getPointAt(0);
+		let tangent = this._curve.getTangentAt(0);
+		let upVector = this.curvePlaneNormal.clone().applyQuaternion(
+			new THREE.Quaternion().setFromAxisAngle(tangent, this._tangentUpAngles[0].angle)
+		);
 
-		for (let i = 1; i < this._tangentUpAngles.length; ++i) {
-			const nextUp = this._tangentUpAngles[i];
+		const ps = [];
 
-			const stepCount = 100;
-			let u = up.splinePosition;
-			const nextU = nextUp.splinePosition;
+		for (let j = 0; j < verticalStepCount; ++j) {
+			totalLengths.push(0);
 
-			const uStep = (nextU - u) / stepCount - 0.00000001;
-
-			let angle = up.angle;
-			const angleStep = (nextUp.angle - up.angle) / stepCount;
-
-			let lengthTop = 0;
-			let lengthBottom = 0;
-
-			let pTop = this._curve.getPointAt(u);
-			const upVector = this.curvePlaneNormal.clone().applyQuaternion(
-				new THREE.Quaternion().setFromAxisAngle(this._curve.getTangentAt(u), angle)
-			);
-			let pBottom = pTop.clone().addScaledVector(upVector, -height);
-			pTop.addScaledVector(upVector, height);
-
-			for (let i = 0; i < stepCount; ++i) {
-				u += uStep;
-				angle += angleStep;
-
-				const nextPTop = this._curve.getPointAt(u);
-				const upVector = this.curvePlaneNormal.clone().applyQuaternion(
-					new THREE.Quaternion().setFromAxisAngle(this._curve.getTangentAt(u), angle)
-				);
-				let nextPBottom = nextPTop.clone().addScaledVector(upVector, -height);
-				nextPTop.addScaledVector(upVector, height);
-
-				lengthTop += nextPTop.distanceTo(pTop);
-				lengthBottom += nextPBottom.distanceTo(pBottom);
-
-				pTop = nextPTop;
-				pBottom = nextPBottom;
-			}
-
-			topLengths.push(lengthTop);
-			bottomLengths.push(lengthBottom);
-
-			totalTopLength += lengthTop;
-			totalBottomLength += lengthBottom;
-
-			up = nextUp;
+			ps.push(p.clone().addScaledVector(upVector, height * (j / (verticalStepCount - 1) - 0.5)));
 		}
 
-		let top = -totalTopLength * 0.5;
-		let bottom = -totalBottomLength * 0.5;
+		let up = this._tangentUpAngles[0];
+		let nextUp = this._tangentUpAngles[1];
+		let upSplinePosDiff = nextUp.splinePosition - up.splinePosition;
+		let upAngleIndex = 1;
 
 		let u = 0;
+
+		let lengths;
+
+		for (let i = 1; i < horizontalStepCount; ++i) {
+			const nextU = i / (horizontalStepCount - 1);
+
+			if (nextU > nextUp.splinePosition) {
+				++upAngleIndex;
+				up = nextUp;
+				nextUp = this._tangentUpAngles[upAngleIndex];
+				upSplinePosDiff = nextUp.splinePosition - up.splinePosition;
+			}
+
+			const weight = (nextUp.splinePosition - nextU) / upSplinePosDiff;
+			const angle = up.angle * weight + nextUp.angle * (1 - weight);
+
+			let tangent = this._curve.getTangentAt(nextU);
+			upVector = this.curvePlaneNormal.clone().applyQuaternion(
+				new THREE.Quaternion().setFromAxisAngle(tangent, angle)
+			);
+
+			if ((i - 1) % horizontalSegmentStepCount === 0 || i === horizontalStepCount - 1) {
+				segmentLengths.push(lengths);
+
+				lengths = [];
+				for (let j = 0; j < verticalStepCount; ++j) {
+					lengths.push(0);
+				}
+			}
+
+			p = this._curve.getPointAt(u);
+
+			for (let j = 0; j < verticalStepCount; ++j) {
+
+				const nextP = p.clone();
+				nextP.addScaledVector(upVector, height * (j / (verticalStepCount - 1) - 0.5));
+
+				const curLength = -nextP.distanceTo(ps[j]) * Math.sign(ps[j].sub(nextP).dot(tangent));
+
+				lengths[j] += curLength;
+				totalLengths[j] += curLength;
+
+				ps[j] = nextP;
+			}
+
+			u = nextU;
+		}
 
 		const uvs = [];
 		const vertices = [];
 		const normals = [];
 		const indices = [];
 
-		// noinspection JSSuspiciousNameCombination
-		vertices.push(
-			top, height, 0,
-			bottom, -height, 0
-		);
-		normals.push(
-			0, 0, 1,
-			0, 0, 1
-		);
-		uvs.push(
-			0, 0,
-			0, 1
-		);
+		segmentLengths.shift();
+		const l = segmentLengths.length + 1;
 
-		for (let i = 0; i < topLengths.length; ++i) {
-			top += topLengths[i];
-			bottom += bottomLengths[i];
+		for (let j = 0; j < verticalStepCount; ++j) {
+			let x = -totalLengths[j] * 0.5;
+			let u = 0;
 
-			// noinspection JSSuspiciousNameCombination
-			vertices.push(
-				top, height, 0,
-				bottom, -height, 0
-			);
+			const ratio = j / (verticalStepCount - 1);
+			const y = height * (2 * ratio - 1);
 
-			normals.push(
-				0, 0, 1,
-				0, 0, 1
-			);
+			vertices.push(x, y, 0);
+			normals.push(0, 0, 1);
+			uvs.push(u, ratio);
 
-			u += topLengths[i] / totalTopLength;
+			for (let i = 0; i < segmentLengths.length; ++i) {
+				x += segmentLengths[i][j];
 
-			uvs.push(
-				u, 0,
-				u, 1,
-			);
+				vertices.push(x, y, 0);
+				normals.push(0, 0, 1);
 
-			indices.push(
-				i * 2, i * 2 + 1, i * 2 + 2,
-				i * 2 + 2, i * 2 + 1, i * 2 + 3
-			)
+				u += segmentLengths[i][j] / totalLengths[j];
+				uvs.push(u, ratio);
+
+				if (j > 0) {
+					const j1l = (j - 1) * l;
+					const jl = j * l;
+
+					indices.push(
+						j1l + i, jl + i, j1l + i + 1,
+						j1l + i + 1, jl + i, jl + i + 1
+					)
+				}
+			}
 		}
 
 		geom.setIndex(indices);
