@@ -63,12 +63,16 @@ export default class HelpersSlice extends HelpersSliceBase {
 
 	// private methods
 	_createGeometry(toAABB) {
-		this._geometry = new GeometriesSlice(
-			this._halfDimensions,
-			this._center,
-			this._planePosition,
-			this._planeDirection,
-			toAABB);
+		try {
+			this._geometry = new GeometriesSlice(
+				this._halfDimensions,
+				this._center,
+				this._planePosition,
+				this._planeDirection,
+				toAABB);
+		} catch (e) {
+			this._geometry = new THREE.Geometry();
+		}
 	}
 
 	cartesianEquation() {
