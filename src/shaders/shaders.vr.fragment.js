@@ -48,11 +48,7 @@ export default class ShadersFragment {
     this._main = `
 
 // Gold Noise ©2015 dcerisano@standard3d.com 
-//  - based on the Golden Ratio, PI and Square Root of Two
-//  - superior distribution
-//  - fastest noise generator function
-//  - works with all chipsets (including low precision)
-
+// https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 const lowp float PHI = 1.61803398874989484820459 * 00000.1; // Golden Ratio   
 const lowp float PI  = 3.14159265358979323846264 * 00000.1; // PI
 const lowp float SQ2 = 1.41421356237309504880169 * 10000.0; // Square Root of Two
