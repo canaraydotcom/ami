@@ -103,14 +103,14 @@ vec3 rotate_vertex_position(vec3 position, vec3 axis, float angle)
 
 vec4 getWorldCoordinates(out vec3 normal) {
 
-  float angle;
-  for (int i = 1; i < ${this._uniforms.uCurveTangentUpAngles.length}; ++i) {
-    if (uCurveTangentUpAngles[i].x >= vUv.x) {
-      angle = mix(uCurveTangentUpAngles[i - 1].y, uCurveTangentUpAngles[i].y, 
-        (vUv.x - uCurveTangentUpAngles[i - 1].x) / (uCurveTangentUpAngles[i].x - uCurveTangentUpAngles[i - 1].x));
-      break;
-    }
-  }
+  // float angle;
+  // for (int i = 1; i < ${this._uniforms.uCurveTangentUpAngles.length}; ++i) {
+  //   if (uCurveTangentUpAngles[i].x >= vUv.x) {
+  //     angle = mix(uCurveTangentUpAngles[i - 1].y, uCurveTangentUpAngles[i].y, 
+  //       (vUv.x - uCurveTangentUpAngles[i - 1].x) / (uCurveTangentUpAngles[i].x - uCurveTangentUpAngles[i - 1].x));
+  //     break;
+  //   }
+  // }
   
   vec2 texturePos = vec2(vUv.x, 0.5);
   vec3 curvePos = texture2D(uCurveCoordinates, texturePos).xyz;
@@ -119,12 +119,12 @@ vec4 getWorldCoordinates(out vec3 normal) {
   // TODO : use same quaternion for normal and up rotations
   
   normal = cross(tangent, uCurvePlaneNormal);
-  normal = rotate_vertex_position(normal, tangent, angle);
+//  normal = rotate_vertex_position(normal, tangent, angle);
     
-  vec3 tangentUp = rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
-  vec3 up = vPos.y * tangentUp;
+  vec3 tangentUp = uCurvePlaneNormal; // rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
+//  vec3 up = -vPos.y * tangentUp;
   
-  return vec4(curvePos + up, 1.0);
+  return vec4(curvePos.xy, -vPos.y, 1.0);
 }
     
 void main(void) {
