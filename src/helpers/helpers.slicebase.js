@@ -334,6 +334,9 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 		this._mesh.visible = this._visible;
 
+		// TODO : look at this at some point. we shouldn't need this but without it current the volume slices disappear when the bottom half is outside the viewport.
+		this._mesh.frustumCulled = false;
+
 		// and add it!
 		this.add(this._mesh);
 	}
