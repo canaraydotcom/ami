@@ -34,6 +34,9 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
 
     this._interpolation = 1; // default to trilinear interpolation
 
+    this._cropHalfDimensions = null;
+    this._cropHalfMatrix = null;
+
     this._create();
   }
 
@@ -149,5 +152,13 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._interpolation = interpolation;
     this._uniforms.uInterpolation.value = this._interpolation;
     this._updateMaterial();
+  }
+
+  set cropHalfDimensions(value) {
+    this._cropHalfDimensions = value;
+  }
+
+  set cropMatrix(value) {
+    this._cropMatrix = value;
   }
 }

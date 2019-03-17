@@ -44,152 +44,170 @@ import coreIntersections from '../core/core.intersections';
  */
 
 export default class GeometriesSlice extends THREE.ShapeGeometry {
-    constructor(halfDimensions, center, position, direction, toAABB = new THREE.Matrix4()) {
-      //
-      // prepare data for the shape!
-      //
-      let aabb = {
-        halfDimensions,
-        center,
-        toAABB,
-      };
+	constructor(halfDimensions, center, position, direction, toAABB = new THREE.Matrix4(),
+							holeHalfDimensions = null, holeToAABB = null) {
+		//
+		// prepare data for the shape!
+		//
+		let aabb = {
+			halfDimensions,
+			center,
+			toAABB,
+		};
 
-      let plane = {
-        position,
-        direction,
-      };
+		let plane = {
+			position,
+			direction,
+		};
 
-      // BOOM!
-      let intersections = coreIntersections.aabbPlane(aabb, plane);
+		// BOOM!
+		let intersections = coreIntersections.aabbPlane(aabb, plane);
 
-      // can not exist before calling the constructor
-      if (intersections.length < 3) {
-        // window.console.log('WARNING: Less than 3 intersections between AABB and Plane.');
-        // window.console.log('AABB');
-        // window.console.log(aabb);
-        // window.console.log('Plane');
-        // window.console.log(plane);
-        // window.console.log('exiting...');
-        // or throw error?
-        throw 'geometries.slice has less than 3 intersections, can not create a valid geometry.';
-      }
+		// can not exist before calling the constructor
+		// if (intersections.length < 3) {
+		// window.console.log('WARNING: Less than 3 intersections between AABB and Plane.');
+		// window.console.log('AABB');
+		// window.console.log(aabb);
+		// window.console.log('Plane');
+		// window.console.log(plane);
+		// window.console.log('exiting...');
+		// or throw error?
+		//   throw 'geometries.slice has less than 3 intersections, can not create a valid geometry.';
+		// }
 
-      let orderedIntersections = GeometriesSlice.orderIntersections(intersections, direction);
-      let sliceShape = GeometriesSlice.shape(orderedIntersections);
+		let orderedIntersections = GeometriesSlice.orderIntersections(intersections, direction);
+		let sliceShape = GeometriesSlice.shape(orderedIntersections);
 
-      //
-      // Generate Geometry from shape
-      // It does triangulation for us!
-      //
-      super(sliceShape);
-      this.type = 'SliceGeometry';
+		const shapes = [sliceShape];
 
-      // update real position of each vertex! (not in 2d)
-      this.vertices = orderedIntersections;
-      this.verticesNeedUpdate = true;
-    }
+		if (holeToAABB) {
+			intersections = coreIntersections.aabbPlane(
+				{
+					halfDimensions: holeHalfDimensions,
+					center: new THREE.Vector3(),
+					toAABB: holeToAABB
+				},
+				plane
+			);
 
-    static shape(points) {
-      //
-      // Create Shape
-      //
-      let shape = new THREE.Shape();
-      // move to first point!
-      shape.moveTo(points[0].xy.x, points[0].xy.y);
+			orderedIntersections = GeometriesSlice.orderIntersections(intersections, direction);
 
-      // loop through all points!
-      for (let l = 1; l < points.length; l++) {
-        // project each on plane!
-        shape.lineTo(points[l].xy.x, points[l].xy.y);
-      }
+			shapes.push(GeometriesSlice.shape(orderedIntersections));
+		}
 
-      // close the shape!
-      shape.lineTo(points[0].xy.x, points[0].xy.y);
-      return shape;
-    }
+		//
+		// Generate Geometry from shape
+		// It does triangulation for us!
+		//
+		super(shapes);
+		this.type = 'SliceGeometry';
 
- /**
-  *
-  * Convenience function to extract center of mass from list of points.
-  *
-  * @private
-  *
-  * @param {Array<THREE.Vector3>} points - Set of points from which we want to extract the center of mass.
-  *
-  * @returns {THREE.Vector3} Center of mass from given points.
-  */
-  static centerOfMass(points) {
-    let centerOfMass = new THREE.Vector3(0, 0, 0);
-    for (let i = 0; i < points.length; i++) {
-      centerOfMass.x += points[i].x;
-      centerOfMass.y += points[i].y;
-      centerOfMass.z += points[i].z;
-    }
-    centerOfMass.divideScalar(points.length);
+		// update real position of each vertex! (not in 2d)
+		this.vertices = orderedIntersections;
+		this.verticesNeedUpdate = true;
+	}
 
-    return centerOfMass;
-  }
+	static shape(points) {
+		//
+		// Create Shape
+		//
+		let shape = new THREE.Shape();
+		// move to first point!
+		shape.moveTo(points[0].xy.x, points[0].xy.y);
 
- /**
-  *
-  * Order 3D planar points around a refence point.
-  *
-  * @private
-  *
-  * @param {Array<THREE.Vector3>} points - Set of planar 3D points to be ordered.
-  * @param {THREE.Vector3} direction - Direction of the plane in which points and reference are sitting.
-  *
-  * @returns {Array<Object>} Set of object representing the ordered points.
-  */
-  static orderIntersections(points, direction) {
-    let reference = GeometriesSlice.centerOfMass(points);
-    // direction from first point to reference
-    let referenceDirection = new THREE.Vector3(
-      points[0].x - reference.x,
-      points[0].y - reference.y,
-      points[0].z - reference.z
-      ).normalize();
+		// loop through all points!
+		for (let l = 1; l < points.length; l++) {
+			// project each on plane!
+			shape.lineTo(points[l].xy.x, points[l].xy.y);
+		}
 
-    let base = new THREE.Vector3(0, 0, 0)
-        .crossVectors(referenceDirection, direction)
-        .normalize();
+		// close the shape!
+		shape.lineTo(points[0].xy.x, points[0].xy.y);
+		return shape;
+	}
 
-    let orderedpoints = [];
+	/**
+	 *
+	 * Convenience function to extract center of mass from list of points.
+	 *
+	 * @private
+	 *
+	 * @param {Array<THREE.Vector3>} points - Set of points from which we want to extract the center of mass.
+	 *
+	 * @returns {THREE.Vector3} Center of mass from given points.
+	 */
+	static centerOfMass(points) {
+		let centerOfMass = new THREE.Vector3(0, 0, 0);
+		for (let i = 0; i < points.length; i++) {
+			centerOfMass.x += points[i].x;
+			centerOfMass.y += points[i].y;
+			centerOfMass.z += points[i].z;
+		}
+		centerOfMass.divideScalar(points.length);
 
-    // other lines // if inter, return location + angle
-    for (let j = 0; j < points.length; j++) {
-      let point = new THREE.Vector3(
-        points[j].x,
-        points[j].y,
-        points[j].z);
-      point.direction = new THREE.Vector3(
-        points[j].x - reference.x,
-        points[j].y - reference.y,
-        points[j].z - reference.z).normalize();
+		return centerOfMass;
+	}
 
-      let x = referenceDirection.dot(point.direction);
-      let y = base.dot(point.direction);
-      point.xy = {x, y};
+	/**
+	 *
+	 * Order 3D planar points around a refence point.
+	 *
+	 * @private
+	 *
+	 * @param {Array<THREE.Vector3>} points - Set of planar 3D points to be ordered.
+	 * @param {THREE.Vector3} direction - Direction of the plane in which points and reference are sitting.
+	 *
+	 * @returns {Array<Object>} Set of object representing the ordered points.
+	 */
+	static orderIntersections(points, direction) {
+		let reference = GeometriesSlice.centerOfMass(points);
+		// direction from first point to reference
+		let referenceDirection = new THREE.Vector3(
+			points[0].x - reference.x,
+			points[0].y - reference.y,
+			points[0].z - reference.z
+		).normalize();
 
-      let theta = Math.atan2(y, x) * (180 / Math.PI);
-      point.angle = theta;
+		let base = new THREE.Vector3(0, 0, 0)
+			.crossVectors(referenceDirection, direction)
+			.normalize();
 
-      orderedpoints.push(point);
-    }
+		let orderedpoints = [];
 
-    orderedpoints.sort(function(a, b) {
-      return a.angle - b.angle;
-    });
+		// other lines // if inter, return location + angle
+		for (let j = 0; j < points.length; j++) {
+			let point = new THREE.Vector3(
+				points[j].x,
+				points[j].y,
+				points[j].z);
+			point.direction = new THREE.Vector3(
+				points[j].x - reference.x,
+				points[j].y - reference.y,
+				points[j].z - reference.z).normalize();
 
-    let noDups = [orderedpoints[0]];
-    let epsilon = 0.0001;
-    for(let i=1; i<orderedpoints.length; i++) {
-      if(Math.abs(orderedpoints[i-1].angle - orderedpoints[i].angle) > epsilon) {
-        noDups.push(orderedpoints[i]);
-      }
-    }
+			let x = referenceDirection.dot(point.direction);
+			let y = base.dot(point.direction);
+			point.xy = {x, y};
 
-    return noDups;
-  }
+			let theta = Math.atan2(y, x) * (180 / Math.PI);
+			point.angle = theta;
+
+			orderedpoints.push(point);
+		}
+
+		orderedpoints.sort(function (a, b) {
+			return a.angle - b.angle;
+		});
+
+		let noDups = [orderedpoints[0]];
+		let epsilon = 0.0001;
+		for (let i = 1; i < orderedpoints.length; i++) {
+			if (Math.abs(orderedpoints[i - 1].angle - orderedpoints[i].angle) > epsilon) {
+				noDups.push(orderedpoints[i]);
+			}
+		}
+
+		return noDups;
+	}
 
 }

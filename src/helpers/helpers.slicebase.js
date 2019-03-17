@@ -44,6 +44,19 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		this._stepResolution = 1;
 
 		this._volumeTransform = new THREE.Matrix4();
+
+		this._cropHalfDimensions = null;
+		this._cropMatrix = null;
+		this._cropGeometry = null;
+		this._cropMesh = null;
+	}
+
+	set cropHalfDimensions(value) {
+		this._cropHalfDimensions = value;
+	}
+
+	set cropMatrix(value) {
+		this._cropMatrix = null;
 	}
 
 	get vertexOnlyTransform() {
@@ -295,9 +308,14 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		const toAABB = this._toAABB.clone();
 		toAABB.multiply(invTransform);
 
-		this._createGeometry(toAABB);
+		let cropMatrix;
+		if (this._cropMatrix) {
+			cropMatrix = this._cropMatrix.clone().multiply(invTransform);
+		}
 
-		if (!this._geometry || !this._geometry.vertices) {
+		this._createGeometry(toAABB, cropMatrix);
+
+		if (!this._geometry.vertices) {
 			return;
 		}
 
@@ -339,9 +357,23 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 		// and add it!
 		this.add(this._mesh);
+
+		if (this._cropGeometry) {
+			this._cropMesh = new THREE.Mesh(this._cropGeometry, this._material);
+			if (this._aaBBspace === 'IJK') {
+				this._cropMesh.applyMatrix(this._stack.ijk2LPS);
+			}
+
+			this._cropMesh.visible = this._visible;
+
+			// TODO : look at this at some point. we shouldn't need this but without it current the volume slices disappear when the bottom half is outside the viewport.
+			this._cropMesh.frustumCulled = false;
+
+			// this.add(this._cropMesh);
+		}
 	}
 
-	_createGeometry(toAABB) {
+	_createGeometry(toAABB, clippingMatrix) {
 		throw new Error('Implement this');
 	}
 
@@ -410,6 +442,15 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			// this._mesh.material.dispose();
 			// this._mesh.material = null;
 			this._mesh = null;
+		}
+
+		if (this._cropMesh) {
+			this.remove(this._cropMesh);
+
+			this._cropMesh.geometry.dispose();
+
+			this._cropGeometry = null;
+			this._cropMesh = null;
 		}
 
 		this._create();

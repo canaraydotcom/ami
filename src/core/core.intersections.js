@@ -450,7 +450,7 @@ export default class Intersections {
     }
 
     if(!Validators.matrix4(aabb.toAABB)) {
-      window.console.log('Invalid aabb.toAABB: ');
+      window.console.trace('Invalid aabb.toAABB: ');
       window.console.log(aabb.toAABB);
 
       return false;
