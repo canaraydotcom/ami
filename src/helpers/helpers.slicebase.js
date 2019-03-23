@@ -47,8 +47,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 		this._cropHalfDimensions = null;
 		this._cropMatrix = null;
-		this._cropGeometry = null;
-		this._cropMesh = null;
 	}
 
 	set cropHalfDimensions(value) {
@@ -56,7 +54,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	}
 
 	set cropMatrix(value) {
-		this._cropMatrix = null;
+		this._cropMatrix = value;
 	}
 
 	get vertexOnlyTransform() {
@@ -340,6 +338,10 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			});
 		}
 
+		if (this._cropMatrix) {
+			this._uniforms.uOpacity.value = 0.5;
+		}
+
 		// update intensity related stuff
 		this.updateIntensitySettings();
 		this.updateIntensitySettingsUniforms();
@@ -357,20 +359,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 		// and add it!
 		this.add(this._mesh);
-
-		if (this._cropGeometry) {
-			this._cropMesh = new THREE.Mesh(this._cropGeometry, this._material);
-			if (this._aaBBspace === 'IJK') {
-				this._cropMesh.applyMatrix(this._stack.ijk2LPS);
-			}
-
-			this._cropMesh.visible = this._visible;
-
-			// TODO : look at this at some point. we shouldn't need this but without it current the volume slices disappear when the bottom half is outside the viewport.
-			this._cropMesh.frustumCulled = false;
-
-			// this.add(this._cropMesh);
-		}
 	}
 
 	_createGeometry(toAABB, clippingMatrix) {
@@ -442,15 +430,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			// this._mesh.material.dispose();
 			// this._mesh.material = null;
 			this._mesh = null;
-		}
-
-		if (this._cropMesh) {
-			this.remove(this._cropMesh);
-
-			this._cropMesh.geometry.dispose();
-
-			this._cropGeometry = null;
-			this._cropMesh = null;
 		}
 
 		this._create();

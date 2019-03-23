@@ -64,21 +64,38 @@ export default class GeometriesSlice extends THREE.ShapeGeometry {
 		let intersections = coreIntersections.aabbPlane(aabb, plane);
 
 		// can not exist before calling the constructor
-		// if (intersections.length < 3) {
-		// window.console.log('WARNING: Less than 3 intersections between AABB and Plane.');
-		// window.console.log('AABB');
-		// window.console.log(aabb);
-		// window.console.log('Plane');
-		// window.console.log(plane);
-		// window.console.log('exiting...');
-		// or throw error?
-		//   throw 'geometries.slice has less than 3 intersections, can not create a valid geometry.';
-		// }
+		if (intersections.length < 3) {
+			return;
+			// window.console.log('WARNING: Less than 3 intersections between AABB and Plane.');
+			// window.console.log('AABB');
+			// window.console.log(aabb);
+			// window.console.log('Plane');
+			// window.console.log(plane);
+			// window.console.log('exiting...');
+			// or throw error?
+			//   throw 'geometries.slice has less than 3 intersections, can not create a valid geometry.';
+		}
 
-		let orderedIntersections = GeometriesSlice.orderIntersections(intersections, direction);
+		// direction from first point to reference
+		let planeXDirection;
+		for (const intersection of intersections) {
+			planeXDirection = intersection.clone().sub(position);
+			if (planeXDirection.lengthSq() > 0.001) {
+				break;
+			}
+		}
+		planeXDirection.normalize();
+		const planeYDirection = new THREE.Vector3(0, 0, 0).crossVectors(planeXDirection, direction).normalize();
+
+		let orderedIntersections = GeometriesSlice.orderIntersections(
+			intersections,
+			position,
+			planeXDirection,
+			planeYDirection
+		);
 		let sliceShape = GeometriesSlice.shape(orderedIntersections);
 
-		const shapes = [sliceShape];
+		let orderedHoleIntersections = [];
 
 		if (holeToAABB) {
 			intersections = coreIntersections.aabbPlane(
@@ -90,21 +107,33 @@ export default class GeometriesSlice extends THREE.ShapeGeometry {
 				plane
 			);
 
-			orderedIntersections = GeometriesSlice.orderIntersections(intersections, direction);
+			if (intersections.length > 2) {
+				// TODO : for ordering only we need a separate center of mass
+				orderedHoleIntersections = GeometriesSlice.orderIntersections(
+					intersections,
+					position,
+					planeXDirection,
+					planeYDirection
+				);
 
-			shapes.push(GeometriesSlice.shape(orderedIntersections));
+				sliceShape.holes.push(GeometriesSlice.shape(orderedHoleIntersections));
+			}
 		}
 
 		//
 		// Generate Geometry from shape
 		// It does triangulation for us!
 		//
-		super(shapes);
+		super(sliceShape);
 		this.type = 'SliceGeometry';
 
 		// update real position of each vertex! (not in 2d)
-		this.vertices = orderedIntersections;
-		this.verticesNeedUpdate = true;
+		this.applyMatrix(
+			new THREE.Matrix4()
+				.makeBasis(planeXDirection, planeYDirection, new THREE.Vector3(0, 0, 1))
+				.setPosition(position)
+		);
+
 	}
 
 	static shape(points) {
@@ -113,16 +142,16 @@ export default class GeometriesSlice extends THREE.ShapeGeometry {
 		//
 		let shape = new THREE.Shape();
 		// move to first point!
-		shape.moveTo(points[0].xy.x, points[0].xy.y);
+		shape.moveTo(points[0].x, points[0].y);
 
 		// loop through all points!
 		for (let l = 1; l < points.length; l++) {
 			// project each on plane!
-			shape.lineTo(points[l].xy.x, points[l].xy.y);
+			shape.lineTo(points[l].x, points[l].y);
 		}
 
 		// close the shape!
-		shape.lineTo(points[0].xy.x, points[0].xy.y);
+		shape.lineTo(points[0].x, points[0].y);
 		return shape;
 	}
 
@@ -155,54 +184,43 @@ export default class GeometriesSlice extends THREE.ShapeGeometry {
 	 * @private
 	 *
 	 * @param {Array<THREE.Vector3>} points - Set of planar 3D points to be ordered.
-	 * @param {THREE.Vector3} direction - Direction of the plane in which points and reference are sitting.
-	 *
+	 * @param {THREE.Vector3} position
+	 * @param {THREE.Vector3} planeXDirection
+	 * @param {THREE.Vector3} planeYDirection
 	 * @returns {Array<Object>} Set of object representing the ordered points.
 	 */
-	static orderIntersections(points, direction) {
-		let reference = GeometriesSlice.centerOfMass(points);
-		// direction from first point to reference
-		let referenceDirection = new THREE.Vector3(
-			points[0].x - reference.x,
-			points[0].y - reference.y,
-			points[0].z - reference.z
-		).normalize();
-
-		let base = new THREE.Vector3(0, 0, 0)
-			.crossVectors(referenceDirection, direction)
-			.normalize();
+	static orderIntersections(points, position, planeXDirection, planeYDirection) {
 
 		let orderedpoints = [];
 
+		const planeCenter = new THREE.Vector2();
+
 		// other lines // if inter, return location + angle
 		for (let j = 0; j < points.length; j++) {
-			let point = new THREE.Vector3(
-				points[j].x,
-				points[j].y,
-				points[j].z);
-			point.direction = new THREE.Vector3(
-				points[j].x - reference.x,
-				points[j].y - reference.y,
-				points[j].z - reference.z).normalize();
+			let point = points[j].clone().sub(position);
+			point = new THREE.Vector2(planeXDirection.dot(point), planeYDirection.dot(point));
 
-			let x = referenceDirection.dot(point.direction);
-			let y = base.dot(point.direction);
-			point.xy = {x, y};
-
-			let theta = Math.atan2(y, x) * (180 / Math.PI);
-			point.angle = theta;
+			planeCenter.add(point);
 
 			orderedpoints.push(point);
 		}
 
+		planeCenter.divideScalar(orderedpoints.length);
+
+		for (let j = 0; j < orderedpoints.length; j++) {
+			const point = orderedpoints[j];
+			const diff = point.clone().sub(planeCenter);
+			point.shapeAngle = diff.angle();
+		}
+
 		orderedpoints.sort(function (a, b) {
-			return a.angle - b.angle;
+			return a.shapeAngle - b.shapeAngle;
 		});
 
 		let noDups = [orderedpoints[0]];
 		let epsilon = 0.0001;
 		for (let i = 1; i < orderedpoints.length; i++) {
-			if (Math.abs(orderedpoints[i - 1].angle - orderedpoints[i].angle) > epsilon) {
+			if (Math.abs(orderedpoints[i - 1].shapeAngle - orderedpoints[i].shapeAngle) > epsilon) {
 				noDups.push(orderedpoints[i]);
 			}
 		}

@@ -86,6 +86,8 @@ void main(void) {
     dataValue.a = 1.0;
   }
 
+  dataValue.a *= uOpacity;
+  
   gl_FragColor = dataValue;
 }
    `;

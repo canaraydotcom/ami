@@ -63,29 +63,15 @@ export default class HelpersSlice extends HelpersSliceBase {
 
 	// private methods
 	_createGeometry(toAABB, cropMatrix) {
-		try {
-			this._geometry = new GeometriesSlice(
-				this._halfDimensions,
-				this._center,
-				this._planePosition,
-				this._planeDirection,
-				toAABB,
-				this._cropHalfDimensions,
-				cropMatrix
-			);
-
-			if (cropMatrix) {
-				this._cropGeometry = new GeometriesSlice(
-					this._cropHalfDimensions,
-					new THREE.Vector3(),
-					this._planePosition,
-					this._planeDirection,
-					cropMatrix
-				)
-			}
-		} catch (e) {
-			this._geometry = new THREE.Geometry();
-		}
+		this._geometry = new GeometriesSlice(
+			this._halfDimensions,
+			this._center,
+			this._planePosition,
+			this._planeDirection,
+			toAABB,
+			this._cropHalfDimensions,
+			cropMatrix
+		);
 	}
 
 	cartesianEquation() {

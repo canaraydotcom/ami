@@ -154,8 +154,16 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._updateMaterial();
   }
 
+  get cropHalfDimensions() {
+    return this._cropHalfDimensions;
+  }
+
   set cropHalfDimensions(value) {
     this._cropHalfDimensions = value;
+  }
+
+  get cropMatrix() {
+    return this._cropMatrix;
   }
 
   set cropMatrix(value) {
