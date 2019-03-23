@@ -338,9 +338,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			});
 		}
 
-		if (this._cropMatrix) {
-			this._uniforms.uOpacity.value = 0.5;
-		}
+		this._uniforms.uOpacity.value = this._cropMatrix ? 0.5 : 1.0;
 
 		// update intensity related stuff
 		this.updateIntensitySettings();
