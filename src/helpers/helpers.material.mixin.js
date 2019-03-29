@@ -7,7 +7,7 @@
 import * as THREE from "three";
 
 
-let HerlpersMaterialMixin = (superclass) => class extends superclass {
+let HelpersMaterialMixin = (superclass) => class extends superclass {
 
   _createMaterial(extraOptions) {
     // generate shaders on-demand!
@@ -61,4 +61,4 @@ let HerlpersMaterialMixin = (superclass) => class extends superclass {
 
 };
 
-export default HerlpersMaterialMixin;
+export default HelpersMaterialMixin;

@@ -64,8 +64,7 @@ export default class GeometriesSlice extends THREE.ShapeGeometry {
 		let intersections = coreIntersections.aabbPlane(aabb, plane);
 
 		// can not exist before calling the constructor
-		if (intersections.length < 3) {
-			return;
+		if (!intersections || intersections.length < 3) {
 			// window.console.log('WARNING: Less than 3 intersections between AABB and Plane.');
 			// window.console.log('AABB');
 			// window.console.log(aabb);
@@ -73,7 +72,7 @@ export default class GeometriesSlice extends THREE.ShapeGeometry {
 			// window.console.log(plane);
 			// window.console.log('exiting...');
 			// or throw error?
-			//   throw 'geometries.slice has less than 3 intersections, can not create a valid geometry.';
+			throw 'geometries.slice has less than 3 intersections, can not create a valid geometry.';
 		}
 
 		// direction from first point to reference

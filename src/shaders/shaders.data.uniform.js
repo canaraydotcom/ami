@@ -58,11 +58,6 @@ export default class ShadersUniform {
         value: 8,
         typeGLSL: 'int',
       },
-      'uInvert': {
-        type: 'i',
-        value: 0,
-        typeGLSL: 'int',
-      },
       'uLut': {
         type: 'i',
         value: 0,

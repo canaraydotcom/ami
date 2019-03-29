@@ -24,6 +24,8 @@ export default class HelpersSlice extends HelpersSliceBase {
 		this._shadersVertex = ShadersVertex;
 		this._uniforms = ShadersUniform.uniforms();
 
+		this._cropChild._uniforms = this._uniforms;
+
 		this._planePosition = position;
 		this._planeDirection = direction;
 
@@ -61,8 +63,26 @@ export default class HelpersSlice extends HelpersSliceBase {
 		this._uniforms.uStep.value = this.planeDirection.clone().multiplyScalar(this.thickness / this._uniforms.uSteps.value);
 	}
 
+	_create() {
+		super._create();
+
+		if (this._cropMatrix && !this._cropChild.parent) {
+			this._cropChild = this.clone();
+			this._cropChild.halfDimensions = this._cropHalfDimensions;
+			this._cropChild.center = new THREE.Vector3();
+			this._cropChild.cropMatrix = null;
+			this._cropChild.cropHalfDimensions = null;
+
+			this.add(this._cropChild);
+
+		} else if (!this._cropMatrix && this._cropChild.parent) {
+			this.remove(this._cropChild);
+		}
+	}
+
 	// private methods
 	_createGeometry(toAABB, cropMatrix) {
+		this._geometry = null;
 		this._geometry = new GeometriesSlice(
 			this._halfDimensions,
 			this._center,
@@ -104,4 +124,9 @@ export default class HelpersSlice extends HelpersSliceBase {
 			-normal.dot(p1)
 		);
 	}
+
+	clone() {
+		return new HelpersSlice(this._stack, this._index, this._planePosition, this._planeDirection, this._aaBBspace).copy(this);
+	}
+
 }
