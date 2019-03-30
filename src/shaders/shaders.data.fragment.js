@@ -2,6 +2,13 @@ import shadersInterpolation from './interpolation/shaders.interpolation';
 
 export const MAX_STEP_COUNT = 512;
 
+export const VARYING = `
+varying vec3 vStartVoxel;
+varying vec3 vStep;
+varying vec3 vStartCropPos;
+varying vec3 vCropStep;
+`;
+
 export default class ShadersFragment {
 
   // pass uniforms object
@@ -46,28 +53,48 @@ export default class ShadersFragment {
     // language=GLSL
     this._main = `
 const int MAX_STEP_COUNT = ${MAX_STEP_COUNT};
-varying vec3 vStartVoxel;
 
 void main(void) {
+
+  vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
   
   // get texture coordinates of current pixel
   vec3 currentVoxel = vStartVoxel;
+  vec3 currentCropPos = vStartCropPos;
   
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
   
+  float valueCount = 0.0;
+  
   float intensity = 0.0;
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
-    ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
-    intensity += dataValue.r;
-    currentVoxel += uStep;
+    
+    if (all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
+        all(lessThan(currentVoxel, dataDim))) {
+        
+      ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
+      float increment = dataValue.r;
+      
+      if (any(lessThan(currentCropPos, vec3(-0.5))) ||
+          any(greaterThan(currentCropPos, vec3(0.5)))) {
+         
+         increment *= 0.3;
+      }
+       
+      intensity += increment;
+      valueCount++;
+    }
+    
+    currentVoxel += vStep;
+    currentCropPos += vCropStep;
     
     if (i >= uSteps) {
       break;
     }
   }
   
-  intensity /= float(uSteps);
+  intensity /= valueCount;
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
   intensity = clamp(intensity, 0.0, 1.0);
@@ -80,8 +107,6 @@ void main(void) {
   dataValue.a = dot(dataValue.rgb, vec3(0.299, 0.587, 0.114));
   dataValue.rgb /= dataValue.a;
 
-  dataValue.a *= uOpacity;
-  
   gl_FragColor = dataValue;
 }
    `;
@@ -97,8 +122,7 @@ void main(void) {
 // uniforms
 ${this.uniforms()}
 
-// varying (should fetch it from vertex directly)
-varying vec4      vPos;
+${VARYING}
 
 // tailored functions
 ${this.functions()}

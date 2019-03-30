@@ -98,16 +98,11 @@ export default class ShadersUniform {
 				value: 256,
 				typeGLSL: 'int',
 			},
-			'uStep': {
-				type: 'v3',
-				value: [1, 0, 0],
-				typeGLSL: 'vec3',
-			},
-      'uOpacity': {
-        type: 'f',
-        value: 1.,
-        typeGLSL: 'float',
-      }
+      'uCropMatrix': {
+        type: 'm4',
+        value: new THREE.Matrix4(),
+        typeGLSL: 'mat4',
+      },
     };
   }
 }

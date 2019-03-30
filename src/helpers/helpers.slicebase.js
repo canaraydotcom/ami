@@ -42,31 +42,23 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		this._stepResolution = 1;
 
 		this._volumeTransform = new THREE.Matrix4();
-
-		this._cropHalfDimensions = null;
-		this._cropMatrix = null;
-		this._cropChild = {
-			_update() {
-			}
-		};
-	}
-
-	get cropHalfDimensions() {
-		return this._cropHalfDimensions;
-	}
-
-	set cropHalfDimensions(value) {
-		this._cropHalfDimensions = value;
-		this._cropChild.halfDimensions = value;
 	}
 
 	get cropMatrix() {
-		return this._cropMatrix;
+		return this._uniforms.uCropMatrix.value;
 	}
 
 	set cropMatrix(value) {
-		this._cropMatrix = value;
-		this._cropChild._toAABB = value;
+		if (value) {
+			this._uniforms.uCropMatrix.value.copy(value);
+		} else {
+			this._uniforms.uCropMatrix.value.set(
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0
+			);
+		}
 	}
 
 	get vertexOnlyTransform() {
@@ -75,11 +67,10 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 	set vertexOnlyTransform(transform) {
 		this._uniforms.uVertexOnlyTransform.value = transform;
-		this._cropChild.vertexOnlyTransform = transform;
 	}
 
 	get volumeTransform() {
-		return this._volumeTransform;
+		return this._volumeTransform.value;
 	}
 
 	set volumeTransform(transform) {
@@ -89,8 +80,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		inv.getInverse(this._volumeTransform);
 		this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
 		this._uniforms.uWorldToData.value.multiply(inv);
-
-		this._cropChild.volumeTransform = transform;
 	}
 
 	get stack() {
@@ -99,8 +88,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 	set stack(stack) {
 		this._stack = stack;
-
-		this._cropChild.stack = stack;
 	}
 
 	get thickness() {
@@ -110,15 +97,11 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set thickness(value) {
 		this._uniforms.uSliceThickness.value = value;
 		this.updateStepUniforms();
-
-		this._cropChild.thickness = value;
 	}
 
 	set stepResolution(value) {
 		this._stepResolution = value;
 		this.updateStepUniforms();
-
-		this._cropChild.stepResolution = value;
 	}
 
 	get stepResolution() {
@@ -132,8 +115,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set windowWidth(windowWidth) {
 		this._windowWidth = windowWidth;
 		this.updateIntensitySettingsUniforms();
-
-		this._cropChild.windowWidth = windowWidth;
 	}
 
 	get windowMin() {
@@ -143,8 +124,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set windowMin(windowMin) {
 		this._windowMin = windowMin;
 		this.updateIntensitySettingsUniforms();
-
-		this._cropChild.windowMin = windowMin;
 	}
 
 	get rescaleSlope() {
@@ -154,8 +133,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set rescaleSlope(rescaleSlope) {
 		this._rescaleSlope = rescaleSlope;
 		this.updateIntensitySettingsUniforms();
-
-		this._cropChild.rescaleSlope = rescaleSlope;
 	}
 
 	get rescaleIntercept() {
@@ -165,8 +142,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set rescaleIntercept(rescaleIntercept) {
 		this._rescaleIntercept = rescaleIntercept;
 		this.updateIntensitySettingsUniforms();
-
-		this._cropChild.rescaleIntercept = rescaleIntercept;
 	}
 
 	get lut() {
@@ -175,8 +150,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 
 	set lut(lut) {
 		this._lut = lut;
-
-		this._cropChild.lut = lut;
 	}
 
 	get lutTexture() {
@@ -186,8 +159,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set lutTexture(lutTexture) {
 		this._lutTexture = lutTexture;
 		this.updateIntensitySettingsUniforms();
-
-		this._cropChild.lutTexture = lutTexture;
 	}
 
 	get intensityAuto() {
@@ -198,8 +169,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		this._intensityAuto = intensityAuto;
 		this.updateIntensitySettings();
 		this.updateIntensitySettingsUniforms();
-
-		this._cropChild.intensityAuto = intensityAuto;
 	}
 
 	get interpolation() {
@@ -210,8 +179,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		this._interpolation = interpolation;
 		this.updateIntensitySettingsUniforms();
 		this._updateMaterial();
-
-		this._cropChild.interpolation = interpolation;
 	}
 
 	get index() {
@@ -221,8 +188,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set index(index) {
 		this._index = index;
 		this._update();
-
-		this._cropChild.index = index;
 	}
 
 	set halfDimensions(halfDimensions) {
@@ -244,8 +209,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set aabbSpace(aabbSpace) {
 		this._aaBBspace = aabbSpace;
 		this._init();
-
-		this._cropChild.aabbSpace = aabbSpace;
 	}
 
 	get aabbSpace() {
@@ -271,8 +234,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set canvasWidth(canvasWidth) {
 		this._canvasWidth = canvasWidth;
 		this._uniforms.uCanvasWidth.value = this._canvasWidth;
-
-		this._cropChild.canvasWidth = canvasWidth;
 	}
 
 	get canvasWidth() {
@@ -282,8 +243,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set canvasHeight(canvasHeight) {
 		this._canvasHeight = canvasHeight;
 		this._uniforms.uCanvasHeight.value = this._canvasHeight;
-
-		this._cropChild.canvasHeight = canvasHeight;
 	}
 
 	get canvasHeight() {
@@ -331,13 +290,8 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		const toAABB = this._toAABB.clone();
 		toAABB.multiply(invTransform);
 
-		let cropMatrix;
-		if (this._cropMatrix) {
-			cropMatrix = this._cropMatrix.clone().multiply(invTransform);
-		}
-
 		try {
-			this._createGeometry(toAABB, cropMatrix);
+			this._createGeometry(toAABB);
 		} catch (e) {
 			return;
 		}
@@ -363,8 +317,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			});
 		}
 
-		this._uniforms.uOpacity.value = this._cropMatrix ? 0.3 : 1.0;
-
 		// update intensity related stuff
 		this.updateIntensitySettings();
 		this.updateIntensitySettingsUniforms();
@@ -384,7 +336,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		this.add(this._mesh);
 	}
 
-	_createGeometry(toAABB, clippingMatrix) {
+	_createGeometry(toAABB) {
 		throw new Error('Implement this');
 	}
 
@@ -453,34 +405,6 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		}
 
 		this._create();
-
-		this._cropChild._update();
 	}
 
-	// be careful. this does not copy everything
-	copy(source) {
-		super.copy(source, false);
-
-		for (const prop of [
-			'vertexOnlyTransform',
-			'volumeTransform',
-			'thickness',
-			'stepResolution',
-			'windowWidth',
-			'windowMin',
-			'rescaleSlope',
-			'rescaleIntercept',
-			'lut',
-			'lutTexture',
-			'intensityAuto',
-			'halfDimensions',
-			'center',
-			'canvasWidth',
-			'canvasHeight',
-		]) {
-			this[prop] = source[prop];
-		}
-
-		return this;
-	}
 }

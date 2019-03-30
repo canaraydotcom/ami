@@ -129,6 +129,11 @@ export default class ShadersUniform {
         value: 0.0,
         typeGLSL: 'float',
       },
+      'uCropMatrix': {
+        type: 'm4',
+        value: new THREE.Matrix4(),
+        typeGLSL: 'mat4',
+      },
     };
   }
 }

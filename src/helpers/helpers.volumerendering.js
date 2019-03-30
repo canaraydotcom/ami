@@ -34,8 +34,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
 
     this._interpolation = 1; // default to trilinear interpolation
 
-    this._cropHalfDimensions = null;
-    this._cropHalfMatrix = null;
+    this._cropMatrix = null;
 
     this._create();
   }
@@ -88,6 +87,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     });
   }
 
+  // TODO : this is called every frame regardless if the matrix has changed or not
   updateMatrix() {
     super.updateMatrix();
 
@@ -95,6 +95,17 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     inv.getInverse(this.matrixWorld);
     this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
     this._uniforms.uWorldToData.value.multiply(inv);
+
+    if (this._cropMatrix) {
+      this._uniforms.uCropMatrix.value.copy(this._cropMatrix);
+    } else {
+      this._uniforms.uCropMatrix.value.set(
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+      );
+    }
   }
 
   _prepareGeometry() {
@@ -152,14 +163,6 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     this._interpolation = interpolation;
     this._uniforms.uInterpolation.value = this._interpolation;
     this._updateMaterial();
-  }
-
-  get cropHalfDimensions() {
-    return this._cropHalfDimensions;
-  }
-
-  set cropHalfDimensions(value) {
-    this._cropHalfDimensions = value;
   }
 
   get cropMatrix() {

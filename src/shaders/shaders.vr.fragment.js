@@ -83,9 +83,8 @@ const int maxIter = ${MAX_RAY_STEPS};
 void main(void) {
 
   // the ray
-  vec3 rayStartPosition = vPos.xyz;
   vec3 rayOrigin = cameraPosition;
-  vec3 diff = rayStartPosition - rayOrigin;
+  vec3 diff = vPos.xyz - rayOrigin;
 
   // Intersection ray/bbox
   float tNear = length(diff);
@@ -100,9 +99,13 @@ void main(void) {
   
   vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
 
-  vec3 currentVoxel = vec3(uWorldToData * vec4(rayStartPosition, 1.0));
+  vec3 step = rayDirection * uStepSize;
 
-  vec3 stepVector = mat3(uWorldToData) * (rayDirection * uStepSize);
+  vec3 currentVoxel = (uWorldToData * vPos).xyz;
+  vec3 stepVector = mat3(uWorldToData) * step;
+
+  vec3 currentCropPos = (uCropMatrix * vPos).xyz;
+  vec3 cropStepVector = mat3(uCropMatrix) * step;
 
   float currentZ = tNear;
   
@@ -120,7 +123,10 @@ void main(void) {
   for (int rayStep = 0; rayStep < maxIter; rayStep++) {
     
     if ( all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
-         all(lessThan(currentVoxel, dataDim))) {
+         all(lessThan(currentVoxel, dataDim)) &&
+         all(greaterThanEqual(currentCropPos, vec3(-0.5))) &&
+         all(lessThanEqual(currentCropPos, vec3(0.5)))
+       ) {
 
       wasInside = true;
 
@@ -156,8 +162,9 @@ void main(void) {
     currentVoxel += stepVector;
     currentZ += uStepSize;
     
+    currentCropPos += cropStepVector;
 
-    if (currentZ >= tFar || rayStep >= uSteps || accumulatedAlpha >= 1.0 ) {
+    if (currentZ >= tFar || rayStep >= uSteps || accumulatedAlpha >= 1.0) {
       break;
     }
   }

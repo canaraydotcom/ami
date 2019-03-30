@@ -12,7 +12,7 @@ let HelpersMaterialMixin = (superclass) => class extends superclass {
   _createMaterial(extraOptions) {
     // generate shaders on-demand!
     let fs = new this._shadersFragment(this._uniforms);
-    let vs = new this._shadersVertex();
+    let vs = new this._shadersVertex(this._uniforms);
 
     // material
     let globalOptions = {
