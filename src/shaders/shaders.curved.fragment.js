@@ -131,12 +131,13 @@ void main(void) {
 
   vec3 normal;
   vec4 dataCoordinates = uWorldToData * getWorldCoordinates(normal);
-  vec3 currentVoxel = dataCoordinates.xyz;
+  vec3 stepDirection = mat3(uWorldToData) * normal * uSliceThickness;
+
+  vec3 currentVoxel = dataCoordinates.xyz - stepDirection * 0.5;
   vec4 dataValue = vec4(0.0);
   vec3 gradient = vec3(0.0);
   
-  // TODO : calculate normal
-  vec3 step = normal * uSliceThickness / float(uSteps);
+  vec3 step = stepDirection / float(uSteps);
   
   float intensity = 0.0;
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
