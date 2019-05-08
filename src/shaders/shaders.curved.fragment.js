@@ -129,6 +129,8 @@ vec4 getWorldCoordinates(out vec3 normal) {
     
 void main(void) {
 
+  vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
+
   vec3 normal;
   vec4 dataCoordinates = uWorldToData * getWorldCoordinates(normal);
   vec3 stepDirection = mat3(uWorldToData) * normal * uSliceThickness;
@@ -141,8 +143,14 @@ void main(void) {
   
   float intensity = 0.0;
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
-  	${shadersInterpolation( this, 'currentVoxel', 'dataValue', 'gradient' )}
-   	intensity += dataValue.r;
+  	
+    if (all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
+        all(lessThan(currentVoxel, dataDim))) {
+
+      ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}
+      intensity += dataValue.r;
+    }
+    
     currentVoxel += step;
     
     if (i >= uSteps) {
