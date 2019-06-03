@@ -1,8 +1,6 @@
 import shadersInterpolation from './interpolation/shaders.interpolation';
 import {MAX_STEP_COUNT} from "./shaders.data.fragment";
 
-export const CURVE_SEGMENTS = 2048;
-export const UP_RESOLUTION = 1024;
 
 export default class ShadersFragment {
 
