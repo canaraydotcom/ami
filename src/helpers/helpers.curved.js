@@ -102,6 +102,10 @@ export default class HelpersCurved extends HelpersSliceBase {
 		// this._geometry.fromBufferGeometry(geom);
 		// this._geometry.mergeVertices();
 		this._geometry = new THREE.PlaneGeometry(this._curveLength, this._halfDimensions.z * 2);
+
+		const pos = new THREE.Vector3().applyMatrix4(toAABB);
+
+		this.position.setY(pos.z - this._halfDimensions.z);
 	}
 
 	updateCurveUniforms() {
