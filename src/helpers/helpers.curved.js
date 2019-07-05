@@ -111,13 +111,13 @@ export default class HelpersCurved extends HelpersSliceBase {
 	updateCurveUniforms() {
 		const curvePointCount = this._curvePoints.length;
 
-		const posData = new Float32Array(curvePointCount * 4);
+		const posData = new Float32Array(curvePointCount * 3);
 		for (let i = 0; i < curvePointCount; ++i) {
-			posData[i * 4] = this._curvePoints[i].x;
-			posData[i * 4 + 1] = this._curvePoints[i].y;
-			posData[i * 4 + 2] = this._curvePoints[i].z;
+			posData[i * 3] = this._curvePoints[i].x;
+			posData[i * 3 + 1] = this._curvePoints[i].y;
+			posData[i * 3 + 2] = this._curvePoints[i].z;
 		}
-		const curvePosTex = new THREE.DataTexture(posData, curvePointCount, 1, THREE.RGBAFormat, THREE.FloatType);
+		const curvePosTex = new THREE.DataTexture(posData, curvePointCount, 1, THREE.RGBFormat, THREE.FloatType);
 		curvePosTex.generateMipmaps = false;
 		curvePosTex.minFilter = THREE.LinearFilter;
 		curvePosTex.maxFilter = THREE.LinearFilter;
@@ -125,14 +125,14 @@ export default class HelpersCurved extends HelpersSliceBase {
 		this._uniforms.uCurveCoordinates.value = curvePosTex;
 		this._uniforms.uCurveLength.value = this._curveLength;
 
-		const tangentData = new Float32Array(curvePointCount * 4);
+		const tangentData = new Float32Array(curvePointCount * 3);
 		for (let i = 0; i < curvePointCount; ++i) {
 			const tangent = this._curveTangents[i];
-			tangentData[i * 4] = tangent.x;
-			tangentData[i * 4 + 1] = tangent.y;
-			tangentData[i * 4 + 2] = tangent.z;
+			tangentData[i * 3] = tangent.x;
+			tangentData[i * 3 + 1] = tangent.y;
+			tangentData[i * 3 + 2] = tangent.z;
 		}
-		const curveTangentTex = new THREE.DataTexture(tangentData, curvePointCount, 1, THREE.RGBAFormat, THREE.FloatType);
+		const curveTangentTex = new THREE.DataTexture(tangentData, curvePointCount, 1, THREE.RGBFormat, THREE.FloatType);
 		curveTangentTex.generateMipmaps = false;
 		curveTangentTex.minFilter = THREE.LinearFilter;
 		curveTangentTex.maxFilter = THREE.LinearFilter;

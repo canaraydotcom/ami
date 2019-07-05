@@ -119,7 +119,7 @@ vec4 getWorldCoordinates(out vec3 normal) {
   normal = cross(tangent, uCurvePlaneNormal);
 //  normal = rotate_vertex_position(normal, tangent, angle);
     
-  vec3 tangentUp = uCurvePlaneNormal; // rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
+//  vec3 tangentUp = uCurvePlaneNormal; // rotate_vertex_position(uCurvePlaneNormal, tangent, angle);
 //  vec3 up = -vPos.y * tangentUp;
   
   return vec4(curvePos.xy, -vPos.y, 1.0);
@@ -169,7 +169,7 @@ void main(void) {
   dataValue.rgb /= dataValue.a;
 
   gl_FragColor = dataValue;
-//  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+  // gl_FragColor = vec4(gl_FragCoord.x / 200.0, gl_FragCoord.y / 200.0, 0.5, 1.0);
 
 }
    `;
