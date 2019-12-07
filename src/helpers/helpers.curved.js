@@ -101,11 +101,14 @@ export default class HelpersCurved extends HelpersSliceBase {
 		// this._geometry = new THREE.Geometry();
 		// this._geometry.fromBufferGeometry(geom);
 		// this._geometry.mergeVertices();
-		this._geometry = new THREE.PlaneGeometry(this._curveLength, this._halfDimensions.z * 2);
+		// TODO : this could be done smarter than just multiplying by 4. Would it be worth it though?
+		const height = Math.max(this._halfDimensions.x, this._halfDimensions.y, this._halfDimensions.z) * 4;
+		this._geometry = new THREE.PlaneGeometry(this._curveLength, height);
 
 		const pos = new THREE.Vector3().applyMatrix4(toAABB);
 
 		this.position.setY(pos.z - this._halfDimensions.z);
+		console.log(this.position.y);
 	}
 
 	updateCurveUniforms() {
