@@ -108,7 +108,6 @@ export default class HelpersCurved extends HelpersSliceBase {
 		const pos = new THREE.Vector3().applyMatrix4(toAABB);
 
 		this.position.setY(pos.z - this._halfDimensions.z);
-		console.log(this.position.y);
 	}
 
 	updateCurveUniforms() {
