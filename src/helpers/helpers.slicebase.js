@@ -314,6 +314,8 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			this._createMaterial({
 				side: THREE.DoubleSide,
 				transparent: true,
+				depthWrite: false,
+				depthTest: false
 			});
 		}
 
