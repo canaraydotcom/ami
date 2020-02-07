@@ -48,6 +48,7 @@ export default class ModelsStack extends ModelsBase {
     this._textureSize = 4096;
     this._nbTextures = 7; // HIGH RES..
     this._rawData = [];
+    this._textures = null;
 
     this._windowMin = 0;
     this._windowWidth = 0;
@@ -59,7 +60,7 @@ export default class ModelsStack extends ModelsBase {
 
     // TRANSFORMATION MATRICES
     this._regMatrix = new THREE.Matrix4();
-	
+
     this._ijk2LPS = null;
     this._lps2IJK = null;
 
@@ -226,7 +227,7 @@ export default class ModelsStack extends ModelsBase {
 
     // compute transforms
     this.computeIJK2LPS();
-  
+
     this.computeLPS2AABB();
     // this.packEchos();
 
@@ -340,7 +341,7 @@ export default class ModelsStack extends ModelsBase {
   }
 
   /**
-   * 
+   *
    */
   zSpacing() {
     if (this._numberOfFrames > 1) {
@@ -699,6 +700,31 @@ export default class ModelsStack extends ModelsBase {
       );
   }
 
+  _prepareTexture() {
+    this._textures = [];
+
+    for (let m = 0; m < this._rawData.length; m++) {
+
+      let tex = new THREE.DataTexture(
+        this._rawData[m],
+        this._textureSize,
+        this._textureSize,
+        this._textureType,
+        THREE.UnsignedByteType,
+        THREE.UVMapping,
+        THREE.ClampToEdgeWrapping,
+        THREE.ClampToEdgeWrapping,
+        THREE.NearestFilter,
+        THREE.NearestFilter
+      );
+
+      tex.needsUpdate = true;
+      tex.flipY = true;
+
+      this._textures.push(tex);
+    }
+  }
+
   _orderFrameOnDimensionIndicesArraySort(a, b) {
     if ('dimensionIndexValues' in a && Object.prototype.toString.call(a.dimensionIndexValues) === '[object Array]' && 'dimensionIndexValues' in b && Object.prototype.toString.call(b.dimensionIndexValues) === '[object Array]') {
       for (let i = 0; i < a.dimensionIndexValues.length; i++) {
@@ -726,14 +752,22 @@ export default class ModelsStack extends ModelsBase {
   }
 
   _sortDistanceArraySort(a, b) {
-return a.dist - b.dist;
-}
+    return a.dist - b.dist;
+  }
   _sortInstanceNumberArraySort(a, b) {
-return a.instanceNumber - b.instanceNumber;
-}
+    return a.instanceNumber - b.instanceNumber;
+  }
   _sortSopInstanceUIDArraySort(a, b) {
-return a.sopInstanceUID - b.sopInstanceUID;
-}
+    return a.sopInstanceUID - b.sopInstanceUID;
+  }
+
+  get textures() {
+    if (!this._textures) {
+      this._prepareTexture();
+    }
+
+    return this._textures;
+  }
 
   set numberOfChannels(numberOfChannels) {
     this._numberOfChannels = numberOfChannels;
@@ -790,11 +824,11 @@ return a.sopInstanceUID - b.sopInstanceUID;
   get halfDimensionsIJK() {
     return this._halfDimensionsIJK;
   }
-  
+
   set regMatrix(regMatrix) {
 	  this._regMatrix = regMatrix;
   }
-  
+
   get regMatrix() {
 	  return this._regMatrix;
   }

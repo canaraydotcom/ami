@@ -40,23 +40,7 @@ let HelpersMaterialMixin = (superclass) => class extends superclass {
   }
 
   _prepareTexture() {
-    this._textures = [];
-    for (let m = 0; m < this._stack._rawData.length; m++) {
-      let tex = new THREE.DataTexture(
-        this._stack.rawData[m],
-        this._stack.textureSize,
-        this._stack.textureSize,
-        this._stack.textureType,
-        THREE.UnsignedByteType,
-        THREE.UVMapping,
-        THREE.ClampToEdgeWrapping,
-        THREE.ClampToEdgeWrapping,
-        THREE.NearestFilter,
-        THREE.NearestFilter);
-      tex.needsUpdate = true;
-      tex.flipY = true;
-      this._textures.push(tex);
-    }
+    this._textures = this._stack.textures;
   }
 
 };
