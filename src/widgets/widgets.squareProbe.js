@@ -75,7 +75,7 @@ VJS.widgets.squareProbe.prototype.select = function(raycaster) {
                     color: 0xFF5722,
                 });
                 let sphere = new THREE.Mesh(sphereGeometry, material);
-                sphere.applyMatrix(new THREE.Matrix4().makeTranslation(
+                sphere.applyMatrix4(new THREE.Matrix4().makeTranslation(
                     worldCoordinates.x, worldCoordinates.y, worldCoordinates.z));
                 sphere.name = 'squareProbeHandle';
                 this.handles.push(sphere);

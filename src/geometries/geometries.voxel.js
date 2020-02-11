@@ -9,7 +9,7 @@ export default class GeometriesVoxel extends THREE.BoxGeometry {
 
     this._location = dataPosition;
 
-    this.applyMatrix(new THREE.Matrix4().makeTranslation(
+    this.applyMatrix4(new THREE.Matrix4().makeTranslation(
       this._location.x,
       this._location.y,
       this._location.z));
@@ -41,7 +41,7 @@ export default class GeometriesVoxel extends THREE.BoxGeometry {
     this.vertices[6].set(- 0.5, - 0.5, - 0.5);
     this.vertices[7].set(- 0.5, - 0.5, + 0.5);
 
-    this.applyMatrix(
+    this.applyMatrix4(
       new THREE.Matrix4().makeTranslation(
         this._location.x,
         this._location.y,

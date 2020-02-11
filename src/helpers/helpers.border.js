@@ -71,7 +71,7 @@ export default class HelpersBorder extends THREE.Object3D {
 
     this._mesh = new THREE.Line(this._geometry, this._material);
     if (this._helpersSlice.aabbSpace === 'IJK') {
-      this._mesh.applyMatrix(this._helpersSlice.stack.ijk2LPS);
+      this._mesh.applyMatrix4(this._helpersSlice.stack.ijk2LPS);
     }
     this._mesh.visible = this._visible;
 

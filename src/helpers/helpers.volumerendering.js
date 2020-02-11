@@ -116,7 +116,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
     let height = worldBBox[3] - worldBBox[2];
     let depth = worldBBox[5] - worldBBox[4];
     this._geometry = new THREE.BoxGeometry(width, height, depth);
-    this._geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
+    this._geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(
       centerLPS.x, centerLPS.y, centerLPS.z));
 
     this._diagonalLength = new THREE.Vector3(width, height, depth).length();

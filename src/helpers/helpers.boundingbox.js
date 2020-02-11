@@ -54,7 +54,7 @@ export default class HelpersBoundingBox extends THREE.Object3D {
     this._geometry = new THREE.BoxGeometry(
       dimensions.x, dimensions.y, dimensions.z);
     // position bbox in image space
-    this._geometry .applyMatrix(new THREE.Matrix4().makeTranslation(
+    this._geometry .applyMatrix4(new THREE.Matrix4().makeTranslation(
       halfDimensions.x + offset.x,
       halfDimensions.y + offset.y,
       halfDimensions.z + offset.z));
@@ -69,7 +69,7 @@ export default class HelpersBoundingBox extends THREE.Object3D {
     this._material = this._mesh.material;
 
     // position bbox in world space
-    this._mesh.applyMatrix(this._stack.ijk2LPS);
+    this._mesh.applyMatrix4(this._stack.ijk2LPS);
     this._mesh.visible = this._visible;
 
     // and add it!

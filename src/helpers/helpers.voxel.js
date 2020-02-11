@@ -101,7 +101,7 @@ export default class HelpersVoxel extends THREE.Object3D {
       });
     this._material.color.set(this._color);
     this._mesh = new THREE.Mesh(this._geometry, this._material);
-    this._mesh.applyMatrix(this._stack.ijk2LPS);
+    this._mesh.applyMatrix4(this._stack.ijk2LPS);
 
     this._mesh.visible = this._showVoxel;
 
