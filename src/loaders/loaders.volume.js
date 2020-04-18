@@ -96,8 +96,8 @@ export default class LoadersVolumes extends LoadersBase {
               // unzip if extension is '.gz'
               if (data.extension === 'gz') {
                 data.gzcompressed = true;
-                data.extension =
-                  data.filename.split('.gz').shift().split('.').pop();
+                data.extension = 'nii';
+                  // data.filename.split('.gz').shift().split('.').pop();
                 let decompressedData = PAKO.inflate(data.buffer);
                 data.buffer = decompressedData.buffer;
               }
