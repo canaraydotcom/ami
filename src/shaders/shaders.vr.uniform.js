@@ -114,16 +114,6 @@ export default class ShadersUniform {
         value: 1.0,
         typeGLSL: 'float',
       },
-      'uScreenOffsetX': {
-        type: 'f',
-        value: 0.0,
-        typeGLSL: 'float',
-      },
-      'uScreenOffsetY': {
-        type: 'f',
-        value: 0.0,
-        typeGLSL: 'float',
-      },
       'uSeed': {
         type: 'f',
         value: 0.0,
