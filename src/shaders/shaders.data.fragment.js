@@ -1,5 +1,6 @@
 import shadersInterpolation from './interpolation/shaders.interpolation';
 
+
 export const MAX_STEP_COUNT = 512;
 
 export const VARYING = `
@@ -12,21 +13,21 @@ varying vec3 vCropStep;
 export default class ShadersFragment {
 
   // pass uniforms object
-  constructor(uniforms) {
+  constructor( uniforms ) {
     this._uniforms = uniforms;
     this._functions = {};
     this._main = '';
   }
 
   functions() {
-    if(this._main === '') {
+    if ( this._main === '' ) {
       // if main is empty, functions can not have been computed
       this.main();
     }
 
     let content = '';
-    for (let property in this._functions) {
-      content += this._functions[property] + '\n';
+    for ( let property in this._functions ) {
+      content += this._functions[ property ] + '\n';
     }
 
     return content;
@@ -34,12 +35,12 @@ export default class ShadersFragment {
 
   uniforms() {
     let content = '';
-    for (let property in this._uniforms) {
-      let uniform = this._uniforms[property];
-      content += `uniform ${uniform.typeGLSL} ${property}`;
+    for ( let property in this._uniforms ) {
+      let uniform = this._uniforms[ property ];
+      content += `uniform ${ uniform.typeGLSL } ${ property }`;
 
-      if(uniform && uniform.length) {
-        content += `[${uniform.length}]`;
+      if ( uniform && uniform.length ) {
+        content += `[${ uniform.length }]`;
       }
 
       content += ';\n';
@@ -52,7 +53,7 @@ export default class ShadersFragment {
     // need to pre-call main to fill up the functions list
     // language=GLSL
     this._main = `
-const int MAX_STEP_COUNT = ${MAX_STEP_COUNT};
+const int MAX_STEP_COUNT = ${ MAX_STEP_COUNT };
 
 void main(void) {
 
@@ -68,12 +69,14 @@ void main(void) {
   float valueCount = 0.0;
   
   float intensity = 0.0;
+  float maxIntensity = 0.0;
+  
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
     
     if (all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
         all(lessThan(currentVoxel, dataDim))) {
         
-      ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
+      ${ shadersInterpolation( this, 'currentVoxel', 'dataValue', 'gradient' ) }  
       float increment = dataValue.r;
       
       if (increment > 0.0) {
@@ -83,8 +86,9 @@ void main(void) {
            
            increment *= 0.3;
         }
-         
-        intensity += increment;
+        
+        maxIntensity = max(maxIntensity, increment); 
+        intensity += increment * increment;
         valueCount++;
       }
     }
@@ -98,6 +102,9 @@ void main(void) {
   }
   
   intensity /= valueCount;
+  intensity = sqrt(intensity);
+//  intensity = intensity * 0.8 + maxIntensity * 0.2;
+  
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
   intensity = clamp(intensity, 0.0, 1.0);
@@ -123,16 +130,16 @@ void main(void) {
     // language=GLSL
     return `
 // uniforms
-${this.uniforms()}
+${ this.uniforms() }
 
-${VARYING}
+${ VARYING }
 
 // tailored functions
-${this.functions()}
+${ this.functions() }
 
 // main loop
-${this._main}
+${ this._main }
       `;
-    }
+  }
 
 }
