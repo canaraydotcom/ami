@@ -76,14 +76,17 @@ void main(void) {
       ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}  
       float increment = dataValue.r;
       
-      if (any(lessThan(currentCropPos, vec3(-0.5))) ||
-          any(greaterThan(currentCropPos, vec3(0.5)))) {
+      if (increment > 0.0) {
+           
+        if (any(lessThan(currentCropPos, vec3(-0.5))) ||
+            any(greaterThan(currentCropPos, vec3(0.5)))) {
+           
+           increment *= 0.3;
+        }
          
-         increment *= 0.3;
+        intensity += increment;
+        valueCount++;
       }
-       
-      intensity += increment;
-      valueCount++;
     }
     
     currentVoxel += vStep;
