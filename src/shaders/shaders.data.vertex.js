@@ -32,8 +32,10 @@ void main() {
   
   vStep = stepDirection * stepSize;
     
-  vStartCropPos = (uCropMatrix * worldCoordinates).xyz;
-  vCropStep = mat3(uCropMatrix) * uSliceNormal * stepSize;
+  vCropStep = mat3(uCropMatrix) * uSliceNormal;
+  vStartCropPos = (uCropMatrix * worldCoordinates).xyz - vCropStep * uSliceThickness * 0.5;
+
+  vCropStep *= stepSize;
 
   gl_Position = projectionMatrix * modelViewMatrix * uVertexOnlyTransform * vec4(position, 1.0 );
 

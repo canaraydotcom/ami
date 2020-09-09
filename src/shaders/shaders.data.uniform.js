@@ -103,6 +103,11 @@ export default class ShadersUniform {
         value: new THREE.Matrix4(),
         typeGLSL: 'mat4',
       },
+      'uMaxFactor': {
+        type: 'f',
+        value: 0,
+        typeGLSL: 'float',
+      }
     };
   }
 }

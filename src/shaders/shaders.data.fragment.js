@@ -74,18 +74,14 @@ void main(void) {
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
     
     if (all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
-        all(lessThan(currentVoxel, dataDim))) {
+        all(lessThan(currentVoxel, dataDim)) && 
+        all(greaterThanEqual(currentCropPos, vec3(-0.5))) &&
+        all(lessThanEqual(currentCropPos, vec3(0.5)))) {
         
       ${ shadersInterpolation( this, 'currentVoxel', 'dataValue', 'gradient' ) }  
       float increment = dataValue.r;
       
       if (increment > 0.0) {
-           
-        if (any(lessThan(currentCropPos, vec3(-0.5))) ||
-            any(greaterThan(currentCropPos, vec3(0.5)))) {
-           
-           increment *= 0.3;
-        }
         
         maxIntensity = max(maxIntensity, increment); 
         intensity += increment * increment;
@@ -103,7 +99,7 @@ void main(void) {
   
   intensity /= valueCount;
   intensity = sqrt(intensity);
-//  intensity = intensity * 0.8 + maxIntensity * 0.2;
+  intensity = mix(intensity, maxIntensity, uMaxFactor);
   
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
