@@ -82,7 +82,6 @@ void main(void) {
       float increment = dataValue.r;
       
       if (increment > 0.0) {
-        
         maxIntensity = max(maxIntensity, increment); 
         intensity += increment * increment;
         valueCount++;
@@ -100,14 +99,12 @@ void main(void) {
   intensity /= valueCount;
   intensity = sqrt(intensity);
   intensity = mix(intensity, maxIntensity, uMaxFactor);
-  
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
   intensity = clamp(intensity, 0.0, 1.0);
 
   // Apply LUT table...
   // should opacity be grabbed there?
-
   dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
   dataValue.a = dot(dataValue.rgb, vec3(0.299, 0.587, 0.114));

@@ -139,14 +139,24 @@ void main(void) {
   
   vec3 step = stepDirection / float(uSteps);
   
+  float valueCount = 0.0;
+
   float intensity = 0.0;
+  float maxIntensity = 0.0;
+
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
   	
     if (all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
         all(lessThan(currentVoxel, dataDim))) {
 
       ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}
-      intensity += dataValue.r;
+      float increment = dataValue.r;
+      
+      if (increment > 0.0) {
+        maxIntensity = max(maxIntensity, increment); 
+        intensity += increment * increment;
+        valueCount++;
+      }
     }
     
     currentVoxel += step;
@@ -156,7 +166,9 @@ void main(void) {
     }
   }
   
-  intensity /= float(uSteps);
+  intensity /= valueCount;
+  intensity = sqrt(intensity);
+  intensity = mix(intensity, maxIntensity, uMaxFactor);
 
   intensity = ( intensity - uWindowMinWidth[0] ) / uWindowMinWidth[1];
   intensity = clamp(intensity, 0.0, 1.0);
@@ -170,7 +182,6 @@ void main(void) {
 
   gl_FragColor = dataValue;
   // gl_FragColor = vec4(gl_FragCoord.x / 200.0, gl_FragCoord.y / 200.0, 0.5, 1.0);
-
 }
    `;
 
