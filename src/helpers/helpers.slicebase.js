@@ -104,7 +104,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	}
 
 	set maxFactor(value) {
-		this._uniforms.uMaxFactor = value;
+		this._uniforms.uMaxFactor.value = value;
 	}
 
 	set stepResolution(value) {
