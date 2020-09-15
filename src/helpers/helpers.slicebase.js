@@ -99,6 +99,14 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		this.updateStepUniforms();
 	}
 
+	get maxFactor() {
+		return this._uniforms.uMaxFactor.value;
+	}
+
+	set maxFactor(value) {
+		this._uniforms.uMaxFactor = value;
+	}
+
 	set stepResolution(value) {
 		this._stepResolution = value;
 		this.updateStepUniforms();
