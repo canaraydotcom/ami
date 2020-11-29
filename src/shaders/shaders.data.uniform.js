@@ -107,6 +107,11 @@ export default class ShadersUniform {
         type: 'f',
         value: 0,
         typeGLSL: 'float',
+      },
+      'uUnmultiplyAlpha': {
+        type: 'b',
+        value: false,
+        typeGLSL: 'bool'
       }
     };
   }

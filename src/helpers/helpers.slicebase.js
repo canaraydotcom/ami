@@ -257,6 +257,25 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 		return this._canvasHeight;
 	}
 
+  get blendMode() {
+    if ( this._material.blendEquation === THREE.MaxEquation ) {
+      return 'max'
+    }
+  }
+
+  set blendMode( value ) {
+    if ( value === 'max' ) {
+      this._material.blending = THREE.CustomBlending;
+      this._material.blendEquation = THREE.MaxEquation;
+      this._material.blendSrc = THREE.SrcAlphaFactor;
+      this._material.blendDst = THREE.DestAlphaFactor;
+      this._material.uniforms.uUnmultiplyAlpha.value = false;
+    } else if ( value === 'add' ) {
+      this._material.blending = THREE.NormalBlending;
+      this._material.uniforms.uUnmultiplyAlpha.value = true;
+    }
+  }
+
 	updateStepUniforms() {
 		let stepSize = this._stack.spacing.x * this.stepResolution;
 		let stepCount = Math.floor(Math.ceil(this.thickness / stepSize) / 2) * 2 + 1;
@@ -362,7 +381,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 				this._windowMin = this._stack.windowMin;
 			}
 
-			if (this.__windowWidth === null) {
+			if (this._windowWidth === null) {
 				this._windowWidth = this._stack.windowWidth;
 			}
 

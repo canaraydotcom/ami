@@ -108,7 +108,10 @@ void main(void) {
   dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
   dataValue.a = dot(dataValue.rgb, vec3(0.299, 0.587, 0.114));
-  dataValue.rgb /= dataValue.a;
+  
+  if (uUnmultiplyAlpha) {
+    dataValue.rgb /= dataValue.a;
+  }
 
   gl_FragColor = dataValue;
 }

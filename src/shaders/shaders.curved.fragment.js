@@ -23,11 +23,11 @@ export default class ShadersFragment {
 
     let content = '';
     for ( let property in this._functions ) {
-    
+
       content  += this._functions[property] + '\n';
-    
+
     }
-    
+
     return content;
 
   }
@@ -36,26 +36,26 @@ export default class ShadersFragment {
 
     let content = '';
     for ( let property in this._uniforms ) {
-      
+
       let uniform = this._uniforms[property];
-      content += `uniform ${uniform.typeGLSL} ${property}`; 
-      
+      content += `uniform ${uniform.typeGLSL} ${property}`;
+
       if( uniform && uniform.length ){
-      
+
         content += `[${uniform.length}]`;
-      
+
       }
-      
+
       content += ';\n';
-    
+
     }
-    
+
     return content;
 
   }
 
   main(){
-  
+
     // need to pre-call main to fill up the functions list
     // language=GLSL
     this._main = `
@@ -178,7 +178,9 @@ void main(void) {
   dataValue = texture2D( uTextureLUT, vec2( intensity , 0.5) );
 
   dataValue.a = dot(dataValue.rgb, vec3(0.299, 0.587, 0.114));
-  dataValue.rgb /= dataValue.a;
+  if (uUnmultiplyAlpha) {
+    dataValue.rgb /= dataValue.a;
+  }
 
   gl_FragColor = dataValue;
   // gl_FragColor = vec4(gl_FragCoord.x / 200.0, gl_FragCoord.y / 200.0, 0.5, 1.0);
@@ -192,7 +194,7 @@ void main(void) {
     let shaderInterpolation = '';
     // shaderInterpolation.inline(args) //true/false
     // shaderInterpolation.functions(args)
-    
+
     // language=GLSL
     return `
 // uniforms
