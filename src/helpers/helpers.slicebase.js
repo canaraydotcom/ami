@@ -268,7 +268,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
       this._material.blending = THREE.CustomBlending;
       this._material.blendEquation = THREE.MaxEquation;
       this._material.blendSrc = THREE.SrcAlphaFactor;
-      this._material.blendDst = THREE.DestAlphaFactor;
+      this._material.blendDst = THREE.DstAlphaFactor;
       this._material.uniforms.uUnmultiplyAlpha.value = false;
     } else if ( value === 'add' ) {
       this._material.blending = THREE.NormalBlending;
