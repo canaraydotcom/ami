@@ -39,7 +39,6 @@ export default class HelpersSlice extends HelpersSliceBase {
 
 	set planePosition(position) {
 		this._planePosition = position;
-		this._update();
 	}
 
 	get planePosition() {
@@ -49,7 +48,6 @@ export default class HelpersSlice extends HelpersSliceBase {
 	set planeDirection(direction) {
 		this._planeDirection = direction;
 		this._uniforms.uSliceNormal.value = direction;
-		this._update();
 	}
 
 	get planeDirection() {
