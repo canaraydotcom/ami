@@ -5,6 +5,7 @@ export default class ShadersVertex {
   }
 
   compute() {
+    // language=GLSL
     return `
 varying vec4 vPos;
 varying vec2 vUv;
@@ -19,7 +20,7 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0 );
 
 }
-        `;
+`;
   }
 
 }

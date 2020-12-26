@@ -128,9 +128,10 @@ vec4 getWorldCoordinates(out vec3 normal) {
 void main(void) {
 
   vec3 dataDim = vec3(float(uDataDimensions.x), float(uDataDimensions.y), float(uDataDimensions.z));
-
+    
   vec3 normal;
-  vec4 dataCoordinates = uWorldToData * getWorldCoordinates(normal);
+  vec4 worldCoordinates = getWorldCoordinates(normal);
+  vec4 dataCoordinates = uWorldToData * worldCoordinates;
   vec3 stepDirection = mat3(uWorldToData) * normal * uSliceThickness;
 
   vec3 currentVoxel = dataCoordinates.xyz - stepDirection * 0.5;
@@ -138,7 +139,10 @@ void main(void) {
   vec3 gradient = vec3(0.0);
   
   vec3 step = stepDirection / float(uSteps);
-  
+    
+  vec3 cropStep = mat3(uCropMatrix) * uSliceNormal;
+  vec3 currentCropPos = (uCropMatrix * worldCoordinates).xyz - cropStep * uSliceThickness * 0.5;
+    
   float valueCount = 0.0;
 
   float intensity = 0.0;
@@ -147,7 +151,9 @@ void main(void) {
   for (int i = 1; i <= MAX_STEP_COUNT; ++i) {
   	
     if (all(greaterThanEqual(currentVoxel, vec3(0.0))) &&
-        all(lessThan(currentVoxel, dataDim))) {
+        all(lessThan(currentVoxel, dataDim)) &&
+        all(greaterThanEqual(currentCropPos, vec3(-0.5))) &&
+        all(lessThanEqual(currentCropPos, vec3(0.5)))) {
 
       ${shadersInterpolation(this, 'currentVoxel', 'dataValue', 'gradient')}
       float increment = dataValue.r;
@@ -160,6 +166,7 @@ void main(void) {
     }
     
     currentVoxel += step;
+    currentCropPos += cropStep;
     
     if (i >= uSteps) {
       break;
