@@ -91,8 +91,7 @@ export default class HelpersVolumeRendering extends HelpersMaterialMixin(THREE.O
   updateMatrix() {
     super.updateMatrix();
 
-    const inv = new THREE.Matrix4();
-    inv.getInverse(this.matrixWorld);
+    const inv = this.matrixWorld.clone().invert();
     this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
     this._uniforms.uWorldToData.value.multiply(inv);
 

@@ -415,8 +415,7 @@ export default class ModelsStack extends ModelsBase {
       this._xCosine.z * this._spacing.x, this._yCosine.z * this._spacing.y, this._zCosine.z * this._spacing.z, this._origin.z,
       0, 0, 0, 1);
     this._ijk2LPS.premultiply(this._regMatrix);
-    this._lps2IJK = new THREE.Matrix4();
-    this._lps2IJK.getInverse(this._ijk2LPS);
+    this._lps2IJK = this._ijk2LPS.clone().invert();
   }
 
   computeLPS2AABB() {
@@ -427,8 +426,7 @@ export default class ModelsStack extends ModelsBase {
         this._xCosine.z, this._yCosine.z, this._zCosine.z, this._origin.z,
         0, 0, 0, 1);
 
-    this._lps2AABB = new THREE.Matrix4();
-    this._lps2AABB.getInverse(this._aabb2LPS);
+    this._lps2AABB = this._aabb2LPS.clone().invert();
   }
 
   merge(stack) {

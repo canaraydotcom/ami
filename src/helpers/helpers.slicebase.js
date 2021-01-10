@@ -76,8 +76,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 	set volumeTransform(transform) {
 		this._volumeTransform = transform;
 
-		const inv = new THREE.Matrix4();
-		inv.getInverse(this._volumeTransform);
+		const inv = this._volumeTransform.clone().invert();
 		this._uniforms.uWorldToData.value = this._stack.lps2IJK.clone();
 		this._uniforms.uWorldToData.value.multiply(inv);
 	}
@@ -311,8 +310,7 @@ export default class HelpersSliceBase extends HelpersMaterialMixin(THREE.Object3
 			return;
 		}
 
-		const invTransform = new THREE.Matrix4();
-		invTransform.getInverse(this._volumeTransform);
+		const invTransform = this._volumeTransform.clone().invert();
 
 		const toAABB = this._toAABB.clone();
 		toAABB.multiply(invTransform);
