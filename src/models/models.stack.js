@@ -508,8 +508,6 @@ export default class ModelsStack extends ModelsBase {
       packed.data = data;
     } else if (bits === 16 && channels === 1) {
       let data = new Uint8Array(textureSize * textureSize * 4);
-      let coordinate = 0;
-      let channelOffset = 0;
 
       for (let i = startVoxel; i < stopVoxel; i++) {
         /* jshint bitwise: false*/
@@ -518,12 +516,10 @@ export default class ModelsStack extends ModelsBase {
         /* jshint bitwise: true*/
 
         let raw = offset + frame[frameIndex].pixelData[inFrameIndex];
-        data[4 * coordinate + 2 * channelOffset] = raw & 0x00FF;
-        data[4 * coordinate + 2 * channelOffset + 1] = (raw >>> 8) & 0x00FF;
+        data[packIndex] = raw & 0x00FF;
+        data[packIndex + 1] = (raw >>> 8) & 0x00FF;
 
-        packIndex++;
-        coordinate = Math.floor(packIndex / 2);
-        channelOffset = packIndex % 2;
+        packIndex += 2;
 
         // TODO : this can be optimized.
       }
