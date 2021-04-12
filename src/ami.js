@@ -9,7 +9,7 @@ import Parsers from './parsers/parsers';
 import Shaders from './shaders/shaders';
 import Widgets from './widgets/widgets';
 
-const pckg = require('../package.json');
+import pckg from '../package.json';
 
 export default{
   Cameras,

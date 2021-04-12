@@ -1,6 +1,6 @@
 /** * Imports ***/
-const PAKO = require('pako');
-const URL = require('url');
+import PAKO from 'pako';
+import URL from 'url';
 
 import LoadersBase from './loaders.base';
 import ModelsSeries from '../models/models.series';

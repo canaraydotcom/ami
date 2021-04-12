@@ -16,10 +16,10 @@
 /** * Imports ***/
 import ParsersVolume from './parsers.volume';
 
-let DicomParser = require('dicom-parser');
-let Jpeg = require('jpeg-lossless-decoder-js');
-let JpegBaseline = require('../../external/scripts/jpeg');
-let Jpx = require('../../external/scripts/jpx');
+import DicomParser from 'dicom-parser';
+import Jpeg from 'jpeg-lossless-decoder-js';
+import JpegBaseline from '../../external/scripts/jpeg';
+import Jpx from '../../external/scripts/jpx';
 
 /**
  * Dicom parser is a combination of utilities to get a VJS image from dicom files.

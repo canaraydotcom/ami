@@ -6,7 +6,7 @@ import CoreUtils from '../core/core.utils';
 import ModelsBase from '../models/models.base';
 import ModelsFrame from './models.frame';
 
-let binaryString = require('math-float32-to-binary-string');
+import binaryString from 'math-float32-to-binary-string';
 
 
 // Slicer way to handle images
